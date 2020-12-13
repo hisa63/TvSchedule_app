@@ -16,8 +16,4 @@ export class Program {
     this.startAirTime = startAirTime
     this.tvSchedule = tvSchedule
   }
-
-  public createProgram(): string {
-    return ''
-  }
 }

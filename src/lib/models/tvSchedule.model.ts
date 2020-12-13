@@ -18,32 +18,47 @@ export class TvSchedule {
     this.scheduleData = scheduleData
     this.programs = []
   }
+  /**
+   * 1時間当たりのheigthのpxを計算する
+   */
   private createOneMinHeight(epgTime: HTMLparse.HTMLElement): number {
     const minHeight = (Math.round(Number(epgTime.attributes.style.match(/(?<=height:).*(?=px;)/)) / 1440 * 10) / 10)
     return minHeight
   }
-
+  /**
+   * 放送時間を計算する 
+   */
   private calculateAirTime(program: HTMLparse.HTMLElement, minHeight: number): number {
     const programHeight = program.attributes.style.match(/(?<=height:).*(?=px;left)/)
     const airTime = Math.round(Number(programHeight) / minHeight)
     return airTime
   }
-
+  /**
+   * 放送開始時間を計算する
+   */
   private calculateStartAirTime(program: HTMLparse.HTMLElement, minHeight: number): number {
     const startProgramHeight = program.attributes.style.match(/(?<=top:).*(?=px)/)
     const aboutStartTime = this.startProgramTime + Math.round(Number(startProgramHeight) / minHeight) / 60
     const startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100
     return startAirTime
   }
-
+  /**
+   * 番組のタイトルを取得する
+   */
   private createProgramTitle(program: HTMLparse.HTMLElement): string {
     const title = program.querySelector('.title')!.text
     return title
   }
+  /**
+   * 番組の概要を取得する
+   */
   private createProgramDetail(program: HTMLparse.HTMLElement): string {
     const detail = program.querySelector('p')!.text
     return detail
   }
+  /**
+   * 各放送局を取得し、インスタンスを作成する
+   */
   private createStation(allStation: HTMLparse.HTMLElement[]): void {
     const stationName: string[] = []
     for (let station of allStation) {
@@ -51,7 +66,9 @@ export class TvSchedule {
     }
     new Station(stationName)
   }
-
+  /**
+   * 番組表の作成
+   */
   public initTvSchedule() {   
     const allProgram = this.scheduleData.querySelectorAll('.pgbox')
     const minHeight = this.createOneMinHeight(this.scheduleData.querySelector('.epgtime')!)
