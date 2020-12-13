@@ -11,29 +11,47 @@ var TvSchedule = /** @class */ (function () {
         this.scheduleData = scheduleData;
         this.programs = [];
     }
+    /**
+     * 1時間当たりのheigthのpxを計算する
+     */
     TvSchedule.prototype.createOneMinHeight = function (epgTime) {
         var minHeight = (Math.round(Number(epgTime.attributes.style.match(/(?<=height:).*(?=px;)/)) / 1440 * 10) / 10);
         return minHeight;
     };
+    /**
+     * 放送時間を計算する
+     */
     TvSchedule.prototype.calculateAirTime = function (program, minHeight) {
         var programHeight = program.attributes.style.match(/(?<=height:).*(?=px;left)/);
         var airTime = Math.round(Number(programHeight) / minHeight);
         return airTime;
     };
+    /**
+     * 放送開始時間を計算する
+     */
     TvSchedule.prototype.calculateStartAirTime = function (program, minHeight) {
         var startProgramHeight = program.attributes.style.match(/(?<=top:).*(?=px)/);
         var aboutStartTime = this.startProgramTime + Math.round(Number(startProgramHeight) / minHeight) / 60;
         var startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100;
         return startAirTime;
     };
+    /**
+     * 番組のタイトルを取得する
+     */
     TvSchedule.prototype.createProgramTitle = function (program) {
         var title = program.querySelector('.title').text;
         return title;
     };
+    /**
+     * 番組の概要を取得する
+     */
     TvSchedule.prototype.createProgramDetail = function (program) {
         var detail = program.querySelector('p').text;
         return detail;
     };
+    /**
+     * 各放送局を取得し、インスタンスを作成する
+     */
     TvSchedule.prototype.createStation = function (allStation) {
         var stationName = [];
         for (var _i = 0, allStation_1 = allStation; _i < allStation_1.length; _i++) {
@@ -42,6 +60,9 @@ var TvSchedule = /** @class */ (function () {
         }
         new station_model_1.Station(stationName);
     };
+    /**
+     * 番組表の作成
+     */
     TvSchedule.prototype.initTvSchedule = function () {
         var _this = this;
         var allProgram = this.scheduleData.querySelectorAll('.pgbox');

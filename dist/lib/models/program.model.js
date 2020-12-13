@@ -9,9 +9,6 @@ var Program = /** @class */ (function () {
         this.startAirTime = startAirTime;
         this.tvSchedule = tvSchedule;
     }
-    Program.prototype.createProgram = function () {
-        return '';
-    };
     return Program;
 }());
 exports.Program = Program;

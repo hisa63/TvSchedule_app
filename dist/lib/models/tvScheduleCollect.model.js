@@ -98,13 +98,18 @@ var TvScheduleCollect = /** @class */ (function () {
             });
         });
     };
+    /**
+     * 登録したキーワードとマッチする番組をピックアップ
+     */
     TvScheduleCollect.prototype.searchProgram = function () {
-        var keyWord = 'ニュース';
+        var keyWordList = ['乃木坂', '天才'];
         var hitProgram = [];
         this.schedules[0].programs.forEach(function (program) {
-            if (program.title.indexOf(keyWord) > 0) {
-                hitProgram.push(program);
-            }
+            keyWordList.forEach(function (keyWord) {
+                if ((program.title.indexOf(keyWord) > 0) || (program.detail.indexOf(keyWord) > 0)) {
+                    hitProgram.push(program);
+                }
+            });
             // console.log('-----------------------------')
             // console.log(`title: ${program.title}`)
             // console.log(`detail: ${program.detail}`)
