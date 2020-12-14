@@ -76,41 +76,46 @@ var TvScheduleCollect = /** @class */ (function () {
         today.push(setDay.getMinutes());
         return today;
     };
-    TvScheduleCollect.prototype.initScheduleCollect = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var today, url, data, scheduleData;
+    /**
+     * 今日の日付から1週間分の番組表を取得する
+     */
+    TvScheduleCollect.prototype.createWeekSchedule = function (today) {
+        var _this = this;
+        // let url = `https://tver.jp/app/epg/23/${today[0]}-${today[1]}-${today[2]}/otd/true`
+        var urlList = [];
+        for (var day = 0; day < 7; day++) {
+            urlList.push("https://tver.jp/app/epg/23/" + today[0] + "-" + today[1] + "-" + (today[2] + day) + "/otd/true");
+        }
+        var dayCount = 0;
+        urlList.forEach(function (url) { return __awaiter(_this, void 0, void 0, function () {
+            var data, scheduleData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        today = this.createDay();
-                        url = "https://tver.jp/app/epg/23/" + today[0] + "-" + today[1] + "-13/otd/true";
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                    case 0: return [4 /*yield*/, axios_1.default.get(url)];
                     case 1:
                         data = _a.sent();
                         scheduleData = HTMLparse.parse(data.data);
-                        this.schedules.push(new tvSchedule_model_1.TvSchedule(this, today[0] + "-" + today[1] + "-13", scheduleData));
-                        this.schedules[0].initTvSchedule();
-                        // 今日の日付を取得
-                        // roopで先一週間の値を取得
-                        this.searchProgram();
-                        this.schedules[0].programs.forEach(function (program) {
-                            console.log('---------------------------');
-                            console.log("titile: " + program.title);
-                            console.log("detail: " + program.detail);
-                            console.log("airTime: " + program.airTime);
-                            console.log("startAirTime: " + program.startAirTime);
-                            console.log("station: " + program.station);
-                        });
+                        this.schedules.push(new tvSchedule_model_1.TvSchedule(this, today[0] + "-" + today[1] + "-" + (today[2] + dayCount), scheduleData));
+                        this.schedules[dayCount++].initTvSchedule();
                         return [2 /*return*/];
                 }
             });
-        });
+        }); });
+    };
+    /**
+     * 番組表を作成
+     */
+    TvScheduleCollect.prototype.initScheduleCollect = function () {
+        var today = this.createDay();
+        this.createWeekSchedule(today);
+        // this.searchProgram()
     };
     /**
      * 登録したキーワードとマッチする番組をピックアップ
      */
     TvScheduleCollect.prototype.searchProgram = function () {
-        var keyWordList = ['ニュース', '天才'];
+        console.log(this.schedules[0].programs[0]);
+        var keyWordList = ['ニュース', 'こんにちは'];
         var hitProgram = [];
         this.schedules[0].programs.forEach(function (program) {
             keyWordList.forEach(function (keyWord) {
@@ -119,8 +124,6 @@ var TvScheduleCollect = /** @class */ (function () {
                 }
             });
         });
-        // console.log('--------------------------')
-        // console.log(hitProgram)
     };
     return TvScheduleCollect;
 }());

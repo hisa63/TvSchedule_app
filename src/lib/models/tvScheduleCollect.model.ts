@@ -19,33 +19,37 @@ export class TvScheduleCollect {
     today.push(setDay.getMinutes())
     return today
   }
-
-  public async initScheduleCollect() {
-    const today = this.createDay()
+  /**
+   * 今日の日付から1週間分の番組表を取得する
+   */
+  private createWeekSchedule(today: number[]): void{
     // let url = `https://tver.jp/app/epg/23/${today[0]}-${today[1]}-${today[2]}/otd/true`
-    let url = `https://tver.jp/app/epg/23/${today[0]}-${today[1]}-13/otd/true`
-    let data = await axios.get(url)
-    let scheduleData = HTMLparse.parse(data.data)
-    this.schedules.push(new TvSchedule(this, `${today[0]}-${today[1]}-13`, scheduleData))
-    this.schedules[0].initTvSchedule()
-
-    // 今日の日付を取得
-    // roopで先一週間の値を取得
-    this.searchProgram()
-    this.schedules[0].programs.forEach(program => {
-      console.log('---------------------------')
-      console.log(`titile: ${program.title}`)
-      console.log(`detail: ${program.detail}`)
-      console.log(`airTime: ${program.airTime}`)
-      console.log(`startAirTime: ${program.startAirTime}`)
-      console.log(`station: ${program.station}`)
+    let urlList: string[] = []
+    for (let day = 0; day < 7; day++) {
+      urlList.push(`https://tver.jp/app/epg/23/${today[0]}-${today[1]}-${today[2] + day}/otd/true`)
+    }
+    let dayCount = 0
+    urlList.forEach(async (url) => {
+      let data = await axios.get(url)
+      let scheduleData = HTMLparse.parse(data.data)
+      this.schedules.push(new TvSchedule(this, `${today[0]}-${today[1]}-${today[2] + dayCount}`, scheduleData))
+      this.schedules[dayCount++].initTvSchedule()
     })
+  }
+  /**
+   * 番組表を作成 
+   */
+  public initScheduleCollect() {
+    const today = this.createDay()
+    this.createWeekSchedule(today)
+    // this.searchProgram()
   }
   /**
    * 登録したキーワードとマッチする番組をピックアップ
    */
   public searchProgram(): void {
-    const keyWordList = ['ニュース', '天才']
+    console.log(this.schedules[0].programs[0])
+    const keyWordList = ['ニュース', 'こんにちは']
     let hitProgram: any[] = []
     this.schedules[0].programs.forEach(program => {
       keyWordList.forEach(keyWord => {
@@ -54,7 +58,5 @@ export class TvScheduleCollect {
         }
       })
     })
-    // console.log('--------------------------')
-    // console.log(hitProgram)
   }
 }
