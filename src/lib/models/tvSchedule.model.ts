@@ -59,31 +59,36 @@ export class TvSchedule {
   /**
    * 各放送局を取得し、インスタンスを作成する
    */
-  private createStation(allStation: HTMLparse.HTMLElement[]): void {
+  private createStation(allStation: HTMLparse.HTMLElement[]): string[] {
     const stationName: string[] = []
     for (let station of allStation) {
       stationName.push(station.text.trim())
     }
     new Station(stationName)
+    return stationName
   }
   /**
    * 番組表の作成
    */
-  public initTvSchedule() {   
-    const allProgram = this.scheduleData.querySelectorAll('.pgbox')
+  public initTvSchedule() {
+    let stationNumber = 0
+    const allStationProgram = this.scheduleData.querySelectorAll('.stationRate')
     const minHeight = this.createOneMinHeight(this.scheduleData.querySelector('.epgtime')!)
-    this.createStation(this.scheduleData.querySelectorAll('.station'))
-    allProgram.forEach(program => {
-      const title = this.createProgramTitle(program)
-      const detail = this.createProgramDetail(program)
-      const airTime = this.calculateAirTime(program, minHeight)
-      const startAirTime = this.calculateStartAirTime(program, minHeight)
-      this.programs.push(new Program(this, title, detail, airTime, startAirTime))
-      // console.log('------------------------------------------------------------')
-      // console.log(`title: ${title}`)  // 番組名
-      // console.log(`detail: ${detail}`) // 番組内容
-      // console.log(`airTime: ${airTime}`) // 放送時間
-      // console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
+    const allStation = this.createStation(this.scheduleData.querySelectorAll('.station'))
+    allStationProgram.forEach(allProgram => {
+      allProgram.querySelectorAll('.pgbox')!.forEach(program => {
+        const title = this.createProgramTitle(program)
+        const detail = this.createProgramDetail(program)
+        const airTime = this.calculateAirTime(program, minHeight)
+        const startAirTime = this.calculateStartAirTime(program, minHeight)
+        this.programs.push(new Program(this, title, detail, airTime, startAirTime, allStation[stationNumber]))
+        // console.log('------------------------------------------------------------')
+        // console.log(`title: ${title}`)  // 番組名
+        // console.log(`detail: ${detail}`) // 番組内容
+        // console.log(`airTime: ${airTime}`) // 放送時間
+        // console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
+      })
+      stationNumber++
     })
   }
 }

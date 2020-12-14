@@ -4,7 +4,7 @@ exports.KeyWord = void 0;
 var KeyWord = /** @class */ (function () {
     function KeyWord(user) {
         this.user = user;
-        this.keyWord = [];
+        this.keyWord = ['クイズ', '天才', '動物'];
     }
     return KeyWord;
 }());

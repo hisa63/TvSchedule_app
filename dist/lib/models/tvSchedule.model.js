@@ -59,26 +59,31 @@ var TvSchedule = /** @class */ (function () {
             stationName.push(station.text.trim());
         }
         new station_model_1.Station(stationName);
+        return stationName;
     };
     /**
      * 番組表の作成
      */
     TvSchedule.prototype.initTvSchedule = function () {
         var _this = this;
-        var allProgram = this.scheduleData.querySelectorAll('.pgbox');
+        var stationNumber = 0;
+        var allStationProgram = this.scheduleData.querySelectorAll('.stationRate');
         var minHeight = this.createOneMinHeight(this.scheduleData.querySelector('.epgtime'));
-        this.createStation(this.scheduleData.querySelectorAll('.station'));
-        allProgram.forEach(function (program) {
-            var title = _this.createProgramTitle(program);
-            var detail = _this.createProgramDetail(program);
-            var airTime = _this.calculateAirTime(program, minHeight);
-            var startAirTime = _this.calculateStartAirTime(program, minHeight);
-            _this.programs.push(new program_model_1.Program(_this, title, detail, airTime, startAirTime));
-            // console.log('------------------------------------------------------------')
-            // console.log(`title: ${title}`)  // 番組名
-            // console.log(`detail: ${detail}`) // 番組内容
-            // console.log(`airTime: ${airTime}`) // 放送時間
-            // console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
+        var allStation = this.createStation(this.scheduleData.querySelectorAll('.station'));
+        allStationProgram.forEach(function (allProgram) {
+            allProgram.querySelectorAll('.pgbox').forEach(function (program) {
+                var title = _this.createProgramTitle(program);
+                var detail = _this.createProgramDetail(program);
+                var airTime = _this.calculateAirTime(program, minHeight);
+                var startAirTime = _this.calculateStartAirTime(program, minHeight);
+                _this.programs.push(new program_model_1.Program(_this, title, detail, airTime, startAirTime, allStation[stationNumber]));
+                // console.log('------------------------------------------------------------')
+                // console.log(`title: ${title}`)  // 番組名
+                // console.log(`detail: ${detail}`) // 番組内容
+                // console.log(`airTime: ${airTime}`) // 放送時間
+                // console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
+            });
+            stationNumber++;
         });
     };
     return TvSchedule;

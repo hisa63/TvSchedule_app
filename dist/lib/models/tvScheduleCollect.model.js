@@ -83,16 +83,24 @@ var TvScheduleCollect = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         today = this.createDay();
-                        url = "https://tver.jp/app/epg/23/" + today[0] + "-" + today[1] + "-" + today[2] + "/otd/true";
+                        url = "https://tver.jp/app/epg/23/" + today[0] + "-" + today[1] + "-13/otd/true";
                         return [4 /*yield*/, axios_1.default.get(url)];
                     case 1:
                         data = _a.sent();
                         scheduleData = HTMLparse.parse(data.data);
-                        this.schedules.push(new tvSchedule_model_1.TvSchedule(this, today[0] + "-" + today[1] + "-" + today[2], scheduleData));
+                        this.schedules.push(new tvSchedule_model_1.TvSchedule(this, today[0] + "-" + today[1] + "-13", scheduleData));
                         this.schedules[0].initTvSchedule();
                         // 今日の日付を取得
                         // roopで先一週間の値を取得
                         this.searchProgram();
+                        this.schedules[0].programs.forEach(function (program) {
+                            console.log('---------------------------');
+                            console.log("titile: " + program.title);
+                            console.log("detail: " + program.detail);
+                            console.log("airTime: " + program.airTime);
+                            console.log("startAirTime: " + program.startAirTime);
+                            console.log("station: " + program.station);
+                        });
                         return [2 /*return*/];
                 }
             });
@@ -102,7 +110,7 @@ var TvScheduleCollect = /** @class */ (function () {
      * 登録したキーワードとマッチする番組をピックアップ
      */
     TvScheduleCollect.prototype.searchProgram = function () {
-        var keyWordList = ['乃木坂', '天才'];
+        var keyWordList = ['ニュース', '天才'];
         var hitProgram = [];
         this.schedules[0].programs.forEach(function (program) {
             keyWordList.forEach(function (keyWord) {
@@ -110,12 +118,9 @@ var TvScheduleCollect = /** @class */ (function () {
                     hitProgram.push(program);
                 }
             });
-            // console.log('-----------------------------')
-            // console.log(`title: ${program.title}`)
-            // console.log(`detail: ${program.detail}`)
         });
-        console.log('--------------------------');
-        console.log(hitProgram);
+        // console.log('--------------------------')
+        // console.log(hitProgram)
     };
     return TvScheduleCollect;
 }());
