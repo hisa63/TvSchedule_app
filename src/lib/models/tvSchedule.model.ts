@@ -1,20 +1,27 @@
 import { TvScheduleCollect } from './tvScheduleCollect.model'
 import { Program } from './program.model'
 import { Station } from './station.model'
+import axios from 'axios'
 import * as HTMLparse from 'fast-html-parser' 
 
 export class TvSchedule {
   scheduleCollect: TvScheduleCollect
-  date: string
-  scheduleData: HTMLparse.HTMLElement
+  // date: string
+  // scheduleData: HTMLparse.HTMLElement
+  year: number
+  month: number
+  day: number
   programs: Program[]
-  startProgramTime = 5
+  readonly startProgramTime = 5
 
-  constructor (scheduleCollect: TvScheduleCollect, date: string, scheduleData: HTMLparse.HTMLElement) {
-    this.date = date
-    this.scheduleCollect = scheduleCollect
-    this.scheduleData = scheduleData
-    this.programs = []
+  // constructor (scheduleCollect: TvScheduleCollect, date: string, scheduleData: HTMLparse.HTMLElement) {
+    constructor (scheduleCollect: TvScheduleCollect, year: number, month: number, day: number) {
+      this.year = year
+      this.month = month
+      this.day = day
+      this.scheduleCollect = scheduleCollect
+      // this.scheduleData = scheduleData
+      this.programs = []
   }
   /**
    * 1時間当たりのheigthのpxを計算する
@@ -75,29 +82,32 @@ export class TvSchedule {
   /**
    * 番組表の作成
    */
-  public initTvSchedule() {
+  public async initTvSchedule() {
+    const url = `https://tver.jp/app/epg/23/${this.year}-${this.month}-${this.day}/otd/true`
+    const htmlData = await axios.get(url)
+    const scheduleData = HTMLparse.parse(htmlData.data.split('<Tナイト>').join('').split('<Mナイト>').join(''))
     let stationNumber = 0
-    const allStationProgram = this.scheduleData.querySelectorAll('.stationRate')
-    const minHeight = this.createOneMinHeight(this.scheduleData.querySelector('.epgtime')!)
-    const allStation = this.createStation(this.scheduleData.querySelectorAll('.station'))
-    allStationProgram.forEach(allProgram => {
-      allProgram.querySelectorAll('.pgbox')!.forEach(program => {
+    const allStationProgram = scheduleData.querySelectorAll('.stationRate')
+    const minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime')!)
+    const allStation = this.createStation(scheduleData.querySelectorAll('.station'))
+
+    for(let allProgram of allStationProgram) {
+      allProgram.querySelectorAll('.pgbox')!.forEach(program => {        
         const id = this.createProgramId(program)
         const title = this.createProgramTitle(program)
         const detail = this.createProgramDetail(program)
         const airTime = this.calculateAirTime(program, minHeight)
         const startAirTime = this.calculateStartAirTime(program, minHeight)
         this.programs.push(new Program(this, id, title, detail, airTime, startAirTime, allStation[stationNumber]))
-      //   console.log('------------------------------------------------------------')
-      //   console.log(`station: ${allStation[stationNumber]}`)
-      //   console.log(`id: ${id}`)
-      //   console.log(`title: ${title}`)  // 番組名
-      //   console.log(`detail: ${detail}`) // 番組内容
-      //   console.log(`airTime: ${airTime}`) // 放送時間
-      //   console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
+        // console.log('------------------------------------------------------------')
+        // console.log(`station: ${allStation[stationNumber]}`)
+        // console.log(`id: ${id}`)
+        // console.log(`title: ${title}`)  // 番組名
+        // console.log(`detail: ${detail}`) // 番組内容
+        // console.log(`airTime: ${airTime}`) // 放送時間
+        // console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
       })
       stationNumber++
-    })
-    console.log(this.scheduleCollect.schedules.length)
+    }
   }
 }

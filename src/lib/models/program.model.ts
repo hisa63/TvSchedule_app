@@ -12,8 +12,6 @@ export class Program {
   startAirTime: number
   station: string
 
-  static reservation: Reservation
-
   constructor (tvSchedule: TvSchedule, id: number ,title: string, detail: string, airTime: number, startAirTime: number, station: string) {
     this.id = id
     this.title = title

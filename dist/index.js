@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tvScheduleCollect_model_1 = require("./lib/models/tvScheduleCollect.model");
-var tvScheduleCollect = new tvScheduleCollect_model_1.TvScheduleCollect;
+var tvScheduleCollect = new tvScheduleCollect_model_1.TvScheduleCollect();
 tvScheduleCollect.initScheduleCollect();
 //vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 // import axios from 'axios'
