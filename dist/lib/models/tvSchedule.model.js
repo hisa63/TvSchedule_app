@@ -134,7 +134,7 @@ var TvSchedule = /** @class */ (function () {
      */
     TvSchedule.prototype.initTvSchedule = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, htmlData, scheduleData, stationNumber, allStationProgram, minHeight, allStation, _i, allStationProgram_1, allProgram;
+            var url, htmlData, scheduleData, stationNumber, allStationProgram, minHeight, allStation, tmpArray, _i, allStationProgram_1, allProgram;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -148,6 +148,7 @@ var TvSchedule = /** @class */ (function () {
                         allStationProgram = scheduleData.querySelectorAll('.stationRate');
                         minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime'));
                         allStation = this.createStation(scheduleData.querySelectorAll('.station'));
+                        tmpArray = [];
                         for (_i = 0, allStationProgram_1 = allStationProgram; _i < allStationProgram_1.length; _i++) {
                             allProgram = allStationProgram_1[_i];
                             allProgram.querySelectorAll('.pgbox').forEach(function (program) {

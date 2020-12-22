@@ -39,8 +39,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TvScheduleCollect = void 0;
 var tvSchedule_model_1 = require("./tvSchedule.model");
 var TvScheduleCollect = /** @class */ (function () {
+    // // vvv  test  vvv
+    // programsId: number[]
+    // // ^^^  test  ^^^
     function TvScheduleCollect() {
         this.schedules = [];
+        // // vvv  test  vvv
+        // this.programsId = []
+        // // ^^^  test  ^^^
     }
     /**
      * 今日から1週間分のTvSchedule作成
@@ -78,36 +84,20 @@ var TvScheduleCollect = /** @class */ (function () {
     TvScheduleCollect.prototype.integrateProgram = function (programs) {
         var next;
         var prev;
-        if (programs[0].startAirTime < programs[1].startAirTime) { // 1 - night
+        if (programs[0].startAirTime < programs[1].startAirTime) {
             next = programs[0];
             prev = programs[1];
-            // programs[0].startAirTime = (programs[0].startAirTime * 60 - programs[1].airTime) / 60
-            // return programs[0]
         }
         else {
             next = programs[1];
             prev = programs[0];
-            // programs[1].airTime = programs[0].airTime
-            // programs[1].startAirTime = (programs[1].startAirTime * 60 - programs[0].airTime) / 60
-            // return programs[1]      
         }
         var startAirTime = next.startAirTime * 60 - prev.airTime;
         var hours = Math.floor(startAirTime / 60);
         var minutes = startAirTime % 60 / 100;
         startAirTime = hours + minutes;
         next.startAirTime = startAirTime;
-        // console.log(`next: ${next.startAirTime}`)
-        // console.log(`startAirTime: ${startAirTime}`)
-        // console.log(`hour: ${hours}`)
-        // console.log(`min: ${minutes}`)
         return next;
-        // if (programs[0].startAirTime > programs[1].startAirTime) {
-        //   programs[0].airTime += programs[1].airTime
-        //   return programs[0]
-        // } else {
-        //   programs[1].airTime += programs[0].airTime
-        //   return programs[1]      
-        // }
     };
     /**
      * programsに同一番組がある場合integrateProgramを実行する

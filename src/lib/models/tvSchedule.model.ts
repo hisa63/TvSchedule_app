@@ -87,6 +87,7 @@ export class TvSchedule {
     const minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime')!)
     const allStation = this.createStation(scheduleData.querySelectorAll('.station'))
 
+    let tmpArray: (number | string)[][] = []
     for(let allProgram of allStationProgram) {
       allProgram.querySelectorAll('.pgbox')!.forEach(program => {        
         const id = this.createProgramId(program)
