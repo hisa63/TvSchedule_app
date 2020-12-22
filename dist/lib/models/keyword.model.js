@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KeyWord = void 0;
-var KeyWord = /** @class */ (function () {
-    function KeyWord(user) {
+exports.Keyword = void 0;
+var Keyword = /** @class */ (function () {
+    function Keyword(user, keyword, priority) {
         this.user = user;
-        this.keyWord = ['クイズ', '天才', '動物'];
+        this.keyword = keyword;
+        this.priority = priority;
     }
-    return KeyWord;
+    return Keyword;
 }());
-exports.KeyWord = KeyWord;
+exports.Keyword = Keyword;
 //# sourceMappingURL=keyword.model.js.map

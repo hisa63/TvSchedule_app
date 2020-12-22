@@ -1,11 +1,12 @@
 import { Program } from './program.model'
-import { KeyWord } from './keyword.model'
+import { Keyword } from './keyword.model'
+import { User } from './user.model'
 
 export class Reservation {
   program: Program
-  keyWord: string
-  constructor (program: Program, keyWord: string) {
+  user: User
+  constructor (program: Program, user: User) {
     this.program = program
-    this.keyWord = keyWord
+    this.user = user
   }
 }

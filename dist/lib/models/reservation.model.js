@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Reservation = void 0;
 var Reservation = /** @class */ (function () {
-    function Reservation(program, keyWord) {
+    function Reservation(program, user) {
         this.program = program;
-        this.keyWord = keyWord;
+        this.user = user;
     }
     return Reservation;
 }());

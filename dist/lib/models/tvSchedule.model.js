@@ -64,14 +64,12 @@ var station_model_1 = require("./station.model");
 var axios_1 = __importDefault(require("axios"));
 var HTMLparse = __importStar(require("fast-html-parser"));
 var TvSchedule = /** @class */ (function () {
-    // constructor (scheduleCollect: TvScheduleCollect, date: string, scheduleData: HTMLparse.HTMLElement) {
     function TvSchedule(scheduleCollect, year, month, day) {
         this.startProgramTime = 5;
         this.year = year;
         this.month = month;
         this.day = day;
         this.scheduleCollect = scheduleCollect;
-        // this.scheduleData = scheduleData
         this.programs = [];
     }
     /**
@@ -145,7 +143,7 @@ var TvSchedule = /** @class */ (function () {
                         return [4 /*yield*/, axios_1.default.get(url)];
                     case 1:
                         htmlData = _a.sent();
-                        scheduleData = HTMLparse.parse(htmlData.data.split('<Tナイト>').join('').split('<Mナイト>').join(''));
+                        scheduleData = HTMLparse.parse(htmlData.data.split('<Tナイト>').join('').split('<Mナイト>').join('').split('<Wナイト>').join(''));
                         stationNumber = 0;
                         allStationProgram = scheduleData.querySelectorAll('.stationRate');
                         minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime'));
@@ -173,6 +171,17 @@ var TvSchedule = /** @class */ (function () {
                 }
             });
         });
+    };
+    /**
+     * keywordにmatchする番組の取得
+     */
+    TvSchedule.prototype.searchPrograms = function (keyword) {
+        var hitPrograms = [];
+        this.programs.forEach(function (program) {
+            if ((program.title.match(keyword)) || (program.title.match(keyword)))
+                hitPrograms.push(program);
+        });
+        return hitPrograms;
     };
     return TvSchedule;
 }());

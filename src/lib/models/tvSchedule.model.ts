@@ -6,22 +6,18 @@ import * as HTMLparse from 'fast-html-parser'
 
 export class TvSchedule {
   scheduleCollect: TvScheduleCollect
-  // date: string
-  // scheduleData: HTMLparse.HTMLElement
   year: number
   month: number
   day: number
   programs: Program[]
   readonly startProgramTime = 5
 
-  // constructor (scheduleCollect: TvScheduleCollect, date: string, scheduleData: HTMLparse.HTMLElement) {
-    constructor (scheduleCollect: TvScheduleCollect, year: number, month: number, day: number) {
-      this.year = year
-      this.month = month
-      this.day = day
-      this.scheduleCollect = scheduleCollect
-      // this.scheduleData = scheduleData
-      this.programs = []
+  constructor (scheduleCollect: TvScheduleCollect, year: number, month: number, day: number) {
+    this.year = year
+    this.month = month
+    this.day = day
+    this.scheduleCollect = scheduleCollect
+    this.programs = []
   }
   /**
    * 1時間当たりのheigthのpxを計算する
@@ -85,7 +81,7 @@ export class TvSchedule {
   public async initTvSchedule() {
     const url = `https://tver.jp/app/epg/23/${this.year}-${this.month}-${this.day}/otd/true`
     const htmlData = await axios.get(url)
-    const scheduleData = HTMLparse.parse(htmlData.data.split('<Tナイト>').join('').split('<Mナイト>').join(''))
+    const scheduleData = HTMLparse.parse(htmlData.data.split('<Tナイト>').join('').split('<Mナイト>').join('').split('<Wナイト>').join(''))
     let stationNumber = 0
     const allStationProgram = scheduleData.querySelectorAll('.stationRate')
     const minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime')!)
@@ -109,5 +105,16 @@ export class TvSchedule {
       })
       stationNumber++
     }
+  }
+  /**
+   * keywordにmatchする番組の取得
+   */
+  public searchPrograms(keyword: string): Program[] {
+    let hitPrograms: Program[] = []
+    this.programs.forEach(program => {
+      if ((program.title.match(keyword)) || (program.title.match(keyword)))
+        hitPrograms.push(program)
+    })
+    return hitPrograms
   }
 }

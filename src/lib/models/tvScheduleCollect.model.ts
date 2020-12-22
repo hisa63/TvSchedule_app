@@ -1,7 +1,5 @@
 import { TvSchedule } from './tvSchedule.model'
-import axios from 'axios'
-import * as HTMLparse from 'fast-html-parser' 
-import { SSL_OP_EPHEMERAL_RSA } from 'constants'
+import { Program } from './program.model'
 
 export class TvScheduleCollect {
   schedules: TvSchedule[]
@@ -9,81 +7,86 @@ export class TvScheduleCollect {
   constructor () {
     this.schedules = []
   }
-
-  private createDay(): number[] {
-    let date = Math.round((new Date()).getTime() / 1000)
-    let today = new Date(date * 1000)
-
-    console.log(`date: ${date}`)
-    console.log(`today: ${today}`)
-    console.log(today.getDate())
-    console.log(today.getFullYear())
-    console.log(today.getMonth() + 1)
-
-    // let today: number[] = []
-    // today.push(date.getFullYear())
-    // today.push(setDay.getMonth() + 1)
-    // today.push(setDay.getDate())
-    // today.push(setDay.getHours())
-    // today.push(setDay.getMinutes())
-    return []
-  }
   /**
-   * 今日の日付から1週間分の番組表を取得する
+   * 今日から1週間分のTvSchedule作成
    */
-  private createWeekSchedule(): void{
+  public async createWeekSchedule(): Promise<void> {
     let oneDay = 0
     let date = Math.round((new Date()).getTime() / 1000)
     for (let i = 0; i < 7; i++) {
       let day = new Date(date * 1000)
       this.schedules.push(new TvSchedule(this, day.getFullYear(), day.getMonth() + 1, day.getDate()))
       date += 24 * 60 * 60
-      // urlList.push(`https://tver.jp/app/epg/23/${today[0]}-${today[1]}-${today[2] + day}/otd/true`)
-    
-    // let dayCount = 0
-    // urlList.forEach(async (url) => {
-      // let data = await axios.get(url)
-      // let scheduleData = HTMLparse.parse((data.data.split('<Tナイト>').join('')).split('mナイト').join(''))
-      // this.schedules.push(new TvSchedule(this, `${today[0]}-${today[1]}-${today[2] + dayCount}`, scheduleData))
-      
-      this.schedules[oneDay++].initTvSchedule()
+      await this.schedules[oneDay++].initTvSchedule()
     }
   }
-  // private createWeekSchedule(today: number[]): void{
-  //   let urlList: string[] = []
-  //   for (let day = 0; day < 7; day++) {
-  //     urlList.push(`https://tver.jp/app/epg/23/${today[0]}-${today[1]}-${today[2] + day}/otd/true`)
-  //   }
-  //   let dayCount = 0
-  //   urlList.forEach(async (url) => {
-  //     let data = await axios.get(url)
-  //     let scheduleData = HTMLparse.parse((data.data.split('<Tナイト>').join('')).split('mナイト').join(''))
-  //     this.schedules.push(new TvSchedule(this, `${today[0]}-${today[1]}-${today[2] + dayCount}`, scheduleData))
-  //     this.schedules[dayCount++].initTvSchedule()
-  //   })
-  // }
   /**
-   * 番組表を作成 
+   * 同一の番組があった際、統合する
    */
-  public initScheduleCollect() {
-    // const today = this.createDay()
-    this.createWeekSchedule()
-
-    this.searchProgram()
+  private integrateProgram(programs: Program[]): Program {
+    let next: Program
+    let prev: Program
+    if (programs[0].startAirTime < programs[1].startAirTime) {
+      next = programs[0]
+      prev = programs[1]
+    } else {
+      next = programs[1]
+      prev = programs[0]
+    }
+    let startAirTime = next.startAirTime * 60 - prev.airTime
+    let hours = Math.floor(startAirTime / 60)
+    let minutes = startAirTime % 60 / 100
+    startAirTime = hours + minutes
+    next.startAirTime = startAirTime
+    return next
+  }
+  /**
+   * programsに同一番組がある場合integrateProgramを実行する
+   */
+  private createIntegrateProgram(programs: Program[], ids: number[]): Program[] {
+    let createIntegratePrograms: Program[] = []
+    ids.forEach(id => {
+      let matchPrograms = programs.filter(program => program.id === id)
+      if (matchPrograms.length === 1) createIntegratePrograms.push(matchPrograms[0])
+      else createIntegratePrograms.push(this.integrateProgram(matchPrograms))
+    })
+    return createIntegratePrograms
+  }
+  /**
+   * 番組のlengthを取得
+   */
+  private createProgramsLength(searchedPrograms: Program[]): number[] {
+    const searchedProgramsId: number[] = []
+    searchedPrograms.forEach(program => {
+      if (searchedProgramsId.indexOf(program.id) < 0)
+        searchedProgramsId.push(program.id)
+    })
+    return searchedProgramsId
+  }
+  /**
+   * 最終的に予約する番組を取得する
+   */
+  private createMustReservePrograms(programs: Program[]): Program[] {
+    const programsId = this.createProgramsLength(programs)
+    if (programs.length === programsId.length) {
+      return programs
+    } else {
+      // test
+      // return programs
+      return this.createIntegrateProgram(programs, programsId)
+    }
   }
   /**
    * 登録したキーワードとマッチする番組をピックアップ
    */
-  public searchProgram(): void {
-    // const keyWordList = ['ニュース', 'こんにちは']
-    // let hitProgram: any[] = []
-    // this.schedules[0].programs.forEach(program => {
-    //   keyWordList.forEach(keyWord => {
-    //     if ((program.title.indexOf(keyWord) > 0) || (program.detail.indexOf(keyWord) > 0)) {
-    //       hitProgram.push(program)
-    //     }
-    //   })
-    // })
-
+  public searchPrograms(keyword: string): Program[] {
+    let shouldReservePrograms: Program[] = []
+    this.schedules.forEach(schedule => {
+      let hitPrograms = schedule.searchPrograms(keyword)
+      hitPrograms.forEach(program => {
+        shouldReservePrograms.push(program)
+      })
+    })
+    return this.createMustReservePrograms(shouldReservePrograms)
   }
 }

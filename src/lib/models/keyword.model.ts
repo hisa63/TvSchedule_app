@@ -1,12 +1,14 @@
 import { Reservation } from './reservation.model'
 import { User } from './user.model'
 
-export class KeyWord {
+export class Keyword {
   user: User
-  keyWord: string[]
+  keyword: string
+  priority: number
 
-  constructor (user: User) {
+  constructor (user: User, keyword: string, priority: number) {
     this.user = user
-    this.keyWord = ['クイズ', '天才', '動物']
+    this.keyword = keyword
+    this.priority = priority
   }
 }
