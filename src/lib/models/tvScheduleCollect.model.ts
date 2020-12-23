@@ -3,14 +3,9 @@ import { Program } from './program.model'
 
 export class TvScheduleCollect {
   schedules: TvSchedule[]
-  // // vvv  test  vvv
-  // programsId: number[]
-  // // ^^^  test  ^^^
+
   constructor () {
     this.schedules = []
-    // // vvv  test  vvv
-    // this.programsId = []
-    // // ^^^  test  ^^^
   }
   /**
    * 今日から1週間分のTvSchedule作成

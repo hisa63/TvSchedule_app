@@ -21,8 +21,5 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   //   })
   //   if (keyword === 'fin') flag = false
   // }
-  tvScheduleCollect.schedules[0].programs.forEach(program => {
-    console.log(program.title)
-  })
 })
 //   ^^^^^    test    ^^^^^
