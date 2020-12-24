@@ -39,14 +39,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TvScheduleCollect = void 0;
 var tvSchedule_model_1 = require("./tvSchedule.model");
 var TvScheduleCollect = /** @class */ (function () {
-    // // vvv  test  vvv
-    // programsId: number[]
-    // // ^^^  test  ^^^
     function TvScheduleCollect() {
         this.schedules = [];
-        // // vvv  test  vvv
-        // this.programsId = []
-        // // ^^^  test  ^^^
+        this.programs = [];
     }
     /**
      * 今日から1週間分のTvSchedule作成
@@ -64,7 +59,7 @@ var TvScheduleCollect = /** @class */ (function () {
                     case 1:
                         if (!(i < 7)) return [3 /*break*/, 4];
                         day = new Date(date * 1000);
-                        this.schedules.push(new tvSchedule_model_1.TvSchedule(this, day.getFullYear(), day.getMonth() + 1, day.getDate()));
+                        this.schedules.push(new tvSchedule_model_1.TvSchedule(this, day.getFullYear(), day.getMonth() + 1, day.getDate(), date));
                         date += 24 * 60 * 60;
                         return [4 /*yield*/, this.schedules[oneDay++].initTvSchedule()];
                     case 2:
@@ -150,7 +145,8 @@ var TvScheduleCollect = /** @class */ (function () {
                 shouldReservePrograms.push(program);
             });
         });
-        return this.createMustReservePrograms(shouldReservePrograms);
+        // return this.createMustReservePrograms(shouldReservePrograms) // test
+        return shouldReservePrograms;
     };
     return TvScheduleCollect;
 }());

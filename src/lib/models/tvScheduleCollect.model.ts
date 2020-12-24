@@ -4,8 +4,12 @@ import { Program } from './program.model'
 export class TvScheduleCollect {
   schedules: TvSchedule[]
 
+  programs: Program[]
+
   constructor () {
     this.schedules = []
+
+    this.programs = []
   }
   /**
    * 今日から1週間分のTvSchedule作成
@@ -15,7 +19,7 @@ export class TvScheduleCollect {
     let date = Math.round((new Date()).getTime() / 1000)
     for (let i = 0; i < 7; i++) {
       let day = new Date(date * 1000)
-      this.schedules.push(new TvSchedule(this, day.getFullYear(), day.getMonth() + 1, day.getDate()))
+      this.schedules.push(new TvSchedule(this, day.getFullYear(), day.getMonth() + 1, day.getDate(), date))
       date += 24 * 60 * 60
       await this.schedules[oneDay++].initTvSchedule()
     }
@@ -87,6 +91,7 @@ export class TvScheduleCollect {
         shouldReservePrograms.push(program)
       })
     })
-    return this.createMustReservePrograms(shouldReservePrograms)
+    // return this.createMustReservePrograms(shouldReservePrograms) // test
+    return shouldReservePrograms
   }
 }

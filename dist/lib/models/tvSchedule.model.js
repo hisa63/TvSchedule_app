@@ -64,13 +64,14 @@ var station_model_1 = require("./station.model");
 var axios_1 = __importDefault(require("axios"));
 var HTMLparse = __importStar(require("fast-html-parser"));
 var TvSchedule = /** @class */ (function () {
-    function TvSchedule(scheduleCollect, year, month, day) {
+    function TvSchedule(scheduleCollect, year, month, day, timeStamp) {
         this.startProgramTime = 5;
         this.year = year;
         this.month = month;
         this.day = day;
         this.scheduleCollect = scheduleCollect;
         this.programs = [];
+        this.timeStamp = timeStamp;
     }
     /**
      * 1時間当たりのheigthのpxを計算する
@@ -130,11 +131,64 @@ var TvSchedule = /** @class */ (function () {
         return stationName;
     };
     /**
+     * 同じidのインスタンスがあるか確認する
+     */
+    TvSchedule.prototype.checkProgramId = function (id) {
+        var hasProgram = null;
+        this.scheduleCollect.programs.forEach(function (program) {
+            if (program.id === id)
+                hasProgram = program;
+        });
+        return hasProgram;
+    };
+    /**
+     * 統合したprogramを前日 or 翌日のscheduleにpushする
+     */
+    TvSchedule.prototype.pushProgram = function (program, oneDay) {
+        var date1 = this.timeStamp;
+        var day1 = new Date(date1 * 1000);
+        // console.log(`testDay: ${day1.getDate()}`)
+        var date = this.timeStamp;
+        var day = new Date(date * 1000);
+        this.scheduleCollect.schedules.forEach(function (schedule) {
+            if (program.title === 'はやドキ!')
+                console.log("title: " + program.title + ", shceduleDay: " + schedule.day + ", day: " + day.getDate() + ", test: " + program.straddleFiveTime + ", testDay: " + day1.getDate());
+            if (schedule.day === day.getDate()) {
+                schedule.programs.push(program);
+            }
+        });
+        // for (let schedule of this.scheduleCollect.schedules) {
+        //   if (schedule.day === day.getDate()) {
+        //     schedule.programs.push(program)
+        //   }
+        // }
+    };
+    /**
+     * 同一番組の統合を行う
+     */
+    TvSchedule.prototype.integrateProgram = function (program, airTime, startAirTime) {
+        if (program.startAirTime > startAirTime) { // program - night
+            program.airTime = airTime;
+            // 翌日のスケジュールにpush
+            program.straddleFiveTime = -24;
+        }
+        else { // program - morning
+            var startTime = program.airTime * 60 - airTime;
+            var hours = Math.floor(startTime / 60);
+            var minutes = startTime % 60 / 100;
+            startTime = hours + minutes;
+            program.startAirTime = startTime;
+            // 前日のスケジュールにpush
+            program.straddleFiveTime = 24;
+        }
+        this.programs.push(program);
+    };
+    /**
      * 番組表の作成
      */
     TvSchedule.prototype.initTvSchedule = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, htmlData, scheduleData, stationNumber, allStationProgram, minHeight, allStation, tmpArray, _i, allStationProgram_1, allProgram;
+            var url, htmlData, scheduleData, stationNumber, allStationProgram, minHeight, allStation, _i, allStationProgram_1, allProgram;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -148,7 +202,6 @@ var TvSchedule = /** @class */ (function () {
                         allStationProgram = scheduleData.querySelectorAll('.stationRate');
                         minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime'));
                         allStation = this.createStation(scheduleData.querySelectorAll('.station'));
-                        tmpArray = [];
                         for (_i = 0, allStationProgram_1 = allStationProgram; _i < allStationProgram_1.length; _i++) {
                             allProgram = allStationProgram_1[_i];
                             allProgram.querySelectorAll('.pgbox').forEach(function (program) {
@@ -157,7 +210,18 @@ var TvSchedule = /** @class */ (function () {
                                 var detail = _this.createProgramDetail(program);
                                 var airTime = _this.calculateAirTime(program, minHeight);
                                 var startAirTime = _this.calculateStartAirTime(program, minHeight);
-                                _this.programs.push(new program_model_1.Program(_this, id, title, detail, airTime, startAirTime, allStation[stationNumber]));
+                                // if (startAirTime !== 5 && (startAirTime + airTime) < 29)
+                                var checkProgram = _this.checkProgramId(id);
+                                // console.log(`program: ${checkProgram}`)
+                                if (checkProgram === null) {
+                                    var newProgram = new program_model_1.Program(_this, id, title, detail, airTime, startAirTime, allStation[stationNumber]);
+                                    _this.programs.push(newProgram);
+                                    _this.scheduleCollect.programs.push(newProgram);
+                                }
+                                else {
+                                    _this.integrateProgram(checkProgram, airTime, startAirTime);
+                                }
+                                // this.programs.push(new Program(this, id, title, detail, airTime, startAirTime, allStation[stationNumber]))
                                 // console.log('------------------------------------------------------------')
                                 // console.log(`station: ${allStation[stationNumber]}`)
                                 // console.log(`id: ${id}`)
