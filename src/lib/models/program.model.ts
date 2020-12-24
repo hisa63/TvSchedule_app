@@ -11,7 +11,6 @@ export class Program {
   airTime: number
   startAirTime: number
   station: string
-  straddleFiveTime: number
 
   constructor (tvSchedule: TvSchedule, id: number ,title: string, detail: string, airTime: number, startAirTime: number, station: string) {
     this.id = id
@@ -21,6 +20,5 @@ export class Program {
     this.startAirTime = startAirTime
     this.tvSchedule = tvSchedule
     this.station = station
-    this.straddleFiveTime = 0
   }
 }

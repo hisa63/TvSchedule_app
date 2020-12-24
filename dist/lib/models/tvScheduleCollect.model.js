@@ -74,43 +74,21 @@ var TvScheduleCollect = /** @class */ (function () {
         });
     };
     /**
-     * 同一の番組があった際、統合する
-     */
-    TvScheduleCollect.prototype.integrateProgram = function (programs) {
-        var next;
-        var prev;
-        if (programs[0].startAirTime < programs[1].startAirTime) {
-            next = programs[0];
-            prev = programs[1];
-        }
-        else {
-            next = programs[1];
-            prev = programs[0];
-        }
-        var startAirTime = next.startAirTime * 60 - prev.airTime;
-        var hours = Math.floor(startAirTime / 60);
-        var minutes = startAirTime % 60 / 100;
-        startAirTime = hours + minutes;
-        next.startAirTime = startAirTime;
-        return next;
-    };
-    /**
-     * programsに同一番組がある場合integrateProgramを実行する
+     * 重複する番組がある場合、番組を1つにする
      */
     TvScheduleCollect.prototype.createIntegrateProgram = function (programs, ids) {
-        var _this = this;
         var createIntegratePrograms = [];
         ids.forEach(function (id) {
             var matchPrograms = programs.filter(function (program) { return program.id === id; });
             if (matchPrograms.length === 1)
                 createIntegratePrograms.push(matchPrograms[0]);
             else
-                createIntegratePrograms.push(_this.integrateProgram(matchPrograms));
+                createIntegratePrograms.push(matchPrograms[0]);
         });
         return createIntegratePrograms;
     };
     /**
-     * 番組のlengthを取得
+     * 重複する番組を統合した後の番組数を取得
      */
     TvScheduleCollect.prototype.createProgramsLength = function (searchedPrograms) {
         var searchedProgramsId = [];
@@ -129,8 +107,6 @@ var TvScheduleCollect = /** @class */ (function () {
             return programs;
         }
         else {
-            // test
-            // return programs
             return this.createIntegrateProgram(programs, programsId);
         }
     };
@@ -145,8 +121,7 @@ var TvScheduleCollect = /** @class */ (function () {
                 shouldReservePrograms.push(program);
             });
         });
-        // return this.createMustReservePrograms(shouldReservePrograms) // test
-        return shouldReservePrograms;
+        return this.createMustReservePrograms(shouldReservePrograms); // 最終的に予約する番組を返す
     };
     return TvScheduleCollect;
 }());

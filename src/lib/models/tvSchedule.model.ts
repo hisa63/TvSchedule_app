@@ -43,8 +43,13 @@ export class TvSchedule {
   private calculateStartAirTime(program: HTMLparse.HTMLElement, minHeight: number): number {
     const startProgramHeight = program.attributes.style.match(/(?<=top:).*(?=px)/)
     const aboutStartTime = this.startProgramTime + Math.round(Number(startProgramHeight) / minHeight) / 60
-    const startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100
-    return startAirTime
+    const hours = Math.floor(aboutStartTime)
+    const minutes = Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100)
+    const newStartTime = new Date(this.year, this.month - 1, this.day, hours, minutes, 0)
+    const startTimeStamp = Math.floor(newStartTime.getTime() / 1000)
+    return startTimeStamp
+    // const startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100
+    // return startAirTime
   }
   /**
    * 番組のidを取得する
@@ -79,7 +84,7 @@ export class TvSchedule {
     return stationName
   }
   /**
-   * 同じidのインスタンスがあるか確認する
+   * 同じidのProgramがあるか確認する
    */
   private checkProgramId(id: number): Program | null {
     let hasProgram: Program | null = null
@@ -87,48 +92,6 @@ export class TvSchedule {
       if (program.id === id) hasProgram = program
     })
     return hasProgram
-  }
-  /**
-   * 統合したprogramを前日 or 翌日のscheduleにpushする 
-   */
-  private pushProgram(program: Program, oneDay: number): void {
-    const date1 = this.timeStamp
-    const day1 = new Date(date1 * 1000)
-    // console.log(`testDay: ${day1.getDate()}`)
-    const date = this.timeStamp
-    const day = new Date(date * 1000)
-
-    this.scheduleCollect.schedules.forEach(schedule => {
-      if (program.title === 'はやドキ!')
-      console.log(`title: ${program.title}, shceduleDay: ${schedule.day}, day: ${day.getDate()}, test: ${program.straddleFiveTime}, testDay: ${day1.getDate()}`)
-      if (schedule.day === day.getDate()) {
-        schedule.programs.push(program)
-      }
-    })
-    // for (let schedule of this.scheduleCollect.schedules) {
-    //   if (schedule.day === day.getDate()) {
-    //     schedule.programs.push(program)
-    //   }
-    // }
-  }
-  /**
-   * 同一番組の統合を行う
-   */
-  private integrateProgram(program: Program, airTime: number, startAirTime: number): void {
-    if (program.startAirTime > startAirTime) {  // program - night
-      program.airTime = airTime
-      // 翌日のスケジュールにpush
-      program.straddleFiveTime = -24
-    } else { // program - morning
-      let startTime = program.airTime * 60 - airTime
-      let hours = Math.floor(startTime / 60)
-      let minutes = startTime % 60 / 100
-      startTime = hours + minutes
-      program.startAirTime = startTime
-      // 前日のスケジュールにpush
-      program.straddleFiveTime = 24
-    }
-    this.programs.push(program)
   }
   /**
    * 番組表の作成
@@ -142,34 +105,23 @@ export class TvSchedule {
     const minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime')!)
     const allStation = this.createStation(scheduleData.querySelectorAll('.station'))
 
-    for(let allProgram of allStationProgram) {
-      allProgram.querySelectorAll('.pgbox')!.forEach(program => {        
+    for (let allProgram of allStationProgram) {
+      for (let program of allProgram.querySelectorAll('.pgbox')) { 
         const id = this.createProgramId(program)
         const title = this.createProgramTitle(program)
         const detail = this.createProgramDetail(program)
         const airTime = this.calculateAirTime(program, minHeight)
         const startAirTime = this.calculateStartAirTime(program, minHeight)
-        // if (startAirTime !== 5 && (startAirTime + airTime) < 29)
         const checkProgram = this.checkProgramId(id)
-        // console.log(`program: ${checkProgram}`)
         if (checkProgram === null) {
           const newProgram = new Program(this, id, title, detail, airTime, startAirTime, allStation[stationNumber])
           this.programs.push(newProgram)
           this.scheduleCollect.programs.push(newProgram)
         } else {
-          this.integrateProgram(checkProgram, airTime, startAirTime)
+          checkProgram.airTime = airTime
+          this.programs.push(checkProgram)
         }
-        // this.programs.push(new Program(this, id, title, detail, airTime, startAirTime, allStation[stationNumber]))
-
-
-        // console.log('------------------------------------------------------------')
-        // console.log(`station: ${allStation[stationNumber]}`)
-        // console.log(`id: ${id}`)
-        // console.log(`title: ${title}`)  // 番組名
-        // console.log(`detail: ${detail}`) // 番組内容
-        // console.log(`airTime: ${airTime}`) // 放送時間
-        // console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
-      })
+      }
       stationNumber++
     }
   }

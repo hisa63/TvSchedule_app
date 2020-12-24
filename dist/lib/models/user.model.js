@@ -22,6 +22,15 @@ var User = /** @class */ (function () {
         return false;
     };
     /**
+     * 予約されている番組のidを配列にして取得
+     */
+    User.prototype.createReserveProgramsId = function () {
+        var reserveProgramsId = this.reservePrograms.map(function (reserveProgram) {
+            return reserveProgram.program.id;
+        });
+        return reserveProgramsId;
+    };
+    /**
      * 入力されたwordをkeywordに登録する
      */
     User.prototype.createKeyword = function (inputWord) {
@@ -38,26 +47,12 @@ var User = /** @class */ (function () {
             this.keywords.splice(index, 1);
     };
     /**
-     * 予約されている番組のidを配列にして取得
-     */
-    User.prototype.createReserveProgramsId = function () {
-        var reserveProgramsId = this.reservePrograms.map(function (reserveProgram) {
-            return reserveProgram.program.id;
-        });
-        return reserveProgramsId;
-    };
-    /**
-     * 指定された番組を予約する
+     * 予約一覧に指定された番組がなければ予約をする
      */
     User.prototype.createReserveProgram = function (program) {
         var reserveProgramsId = this.createReserveProgramsId();
-        for (var _i = 0, reserveProgramsId_1 = reserveProgramsId; _i < reserveProgramsId_1.length; _i++) {
-            var id = reserveProgramsId_1[_i];
-            if (id === program.id)
-                break;
-            else
-                this.reservePrograms.push(new reservation_model_1.Reservation(program, this));
-        }
+        if (reserveProgramsId.indexOf(program.id) < 0)
+            this.reservePrograms.push(new reservation_model_1.Reservation(program, this));
     };
     /**
      * 指定された番組の予約を削除する

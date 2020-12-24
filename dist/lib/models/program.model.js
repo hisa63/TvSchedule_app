@@ -10,7 +10,6 @@ var Program = /** @class */ (function () {
         this.startAirTime = startAirTime;
         this.tvSchedule = tvSchedule;
         this.station = station;
-        this.straddleFiveTime = 0;
     }
     return Program;
 }());
