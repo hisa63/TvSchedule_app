@@ -3,6 +3,7 @@ import { Program } from './program.model'
 import { Station } from './station.model'
 import axios from 'axios'
 import * as HTMLparse from 'fast-html-parser' 
+import { start } from 'repl'
 
 export class TvSchedule {
   scheduleCollect: TvScheduleCollect
@@ -10,14 +11,16 @@ export class TvSchedule {
   month: number
   day: number
   programs: Program[]
+  readonly timeStamp: number
   readonly startProgramTime = 5
 
-  constructor (scheduleCollect: TvScheduleCollect, year: number, month: number, day: number) {
+  constructor (scheduleCollect: TvScheduleCollect, year: number, month: number, day: number, timeStamp: number) {
     this.year = year
     this.month = month
     this.day = day
     this.scheduleCollect = scheduleCollect
     this.programs = []
+    this.timeStamp = timeStamp
   }
   /**
    * 1時間当たりのheigthのpxを計算する
@@ -40,8 +43,13 @@ export class TvSchedule {
   private calculateStartAirTime(program: HTMLparse.HTMLElement, minHeight: number): number {
     const startProgramHeight = program.attributes.style.match(/(?<=top:).*(?=px)/)
     const aboutStartTime = this.startProgramTime + Math.round(Number(startProgramHeight) / minHeight) / 60
-    const startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100
-    return startAirTime
+    const hours = Math.floor(aboutStartTime)
+    const minutes = Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100)
+    const newStartTime = new Date(this.year, this.month - 1, this.day, hours, minutes, 0)
+    const startTimeStamp = Math.floor(newStartTime.getTime() / 1000)
+    return startTimeStamp
+    // const startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100
+    // return startAirTime
   }
   /**
    * 番組のidを取得する
@@ -76,6 +84,16 @@ export class TvSchedule {
     return stationName
   }
   /**
+   * 同じidのProgramがあるか確認する
+   */
+  private checkProgramId(id: number): Program | null {
+    let hasProgram: Program | null = null
+    this.scheduleCollect.programs.forEach(program => {
+      if (program.id === id) hasProgram = program
+    })
+    return hasProgram
+  }
+  /**
    * 番組表の作成
    */
   public async initTvSchedule() {
@@ -87,23 +105,23 @@ export class TvSchedule {
     const minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime')!)
     const allStation = this.createStation(scheduleData.querySelectorAll('.station'))
 
-    let tmpArray: (number | string)[][] = []
-    for(let allProgram of allStationProgram) {
-      allProgram.querySelectorAll('.pgbox')!.forEach(program => {        
+    for (let allProgram of allStationProgram) {
+      for (let program of allProgram.querySelectorAll('.pgbox')) { 
         const id = this.createProgramId(program)
         const title = this.createProgramTitle(program)
         const detail = this.createProgramDetail(program)
         const airTime = this.calculateAirTime(program, minHeight)
         const startAirTime = this.calculateStartAirTime(program, minHeight)
-        this.programs.push(new Program(this, id, title, detail, airTime, startAirTime, allStation[stationNumber]))
-        // console.log('------------------------------------------------------------')
-        // console.log(`station: ${allStation[stationNumber]}`)
-        // console.log(`id: ${id}`)
-        // console.log(`title: ${title}`)  // 番組名
-        // console.log(`detail: ${detail}`) // 番組内容
-        // console.log(`airTime: ${airTime}`) // 放送時間
-        // console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
-      })
+        const checkProgram = this.checkProgramId(id)
+        if (checkProgram === null) {
+          const newProgram = new Program(this, id, title, detail, airTime, startAirTime, allStation[stationNumber])
+          this.programs.push(newProgram)
+          this.scheduleCollect.programs.push(newProgram)
+        } else {
+          checkProgram.airTime = airTime
+          this.programs.push(checkProgram)
+        }
+      }
       stationNumber++
     }
   }

@@ -25,6 +25,15 @@ export class User {
     return false
   }
   /**
+   * 予約されている番組のidを配列にして取得
+   */
+  private createReserveProgramsId(): number[] {
+    const reserveProgramsId = this.reservePrograms.map(reserveProgram => {
+      return reserveProgram.program.id
+    })
+    return reserveProgramsId
+  }
+  /**
    * 入力されたwordをkeywordに登録する 
    */
   public createKeyword(inputWord: string): void {
@@ -40,23 +49,12 @@ export class User {
     if (index >= 0) this.keywords.splice(index, 1)
   }
   /**
-   * 予約されている番組のidを配列にして取得
-   */
-  private createReserveProgramsId(): number[] {
-    const reserveProgramsId = this.reservePrograms.map(reserveProgram => {
-      return reserveProgram.program.id
-    })
-    return reserveProgramsId
-  }
-  /**
-   * 指定された番組を予約する
+   * 予約一覧に指定された番組がなければ予約をする
    */
   public createReserveProgram(program: Program): void {
     const reserveProgramsId = this.createReserveProgramsId()
-    for (let id of reserveProgramsId) {
-      if (id === program.id) break
-      else this.reservePrograms.push(new Reservation(program, this))
-    }
+    if (reserveProgramsId.indexOf(program.id) < 0)
+      this.reservePrograms.push(new Reservation(program, this))
   }
   /**
    * 指定された番組の予約を削除する

@@ -64,13 +64,14 @@ var station_model_1 = require("./station.model");
 var axios_1 = __importDefault(require("axios"));
 var HTMLparse = __importStar(require("fast-html-parser"));
 var TvSchedule = /** @class */ (function () {
-    function TvSchedule(scheduleCollect, year, month, day) {
+    function TvSchedule(scheduleCollect, year, month, day, timeStamp) {
         this.startProgramTime = 5;
         this.year = year;
         this.month = month;
         this.day = day;
         this.scheduleCollect = scheduleCollect;
         this.programs = [];
+        this.timeStamp = timeStamp;
     }
     /**
      * 1時間当たりのheigthのpxを計算する
@@ -93,8 +94,13 @@ var TvSchedule = /** @class */ (function () {
     TvSchedule.prototype.calculateStartAirTime = function (program, minHeight) {
         var startProgramHeight = program.attributes.style.match(/(?<=top:).*(?=px)/);
         var aboutStartTime = this.startProgramTime + Math.round(Number(startProgramHeight) / minHeight) / 60;
-        var startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100;
-        return startAirTime;
+        var hours = Math.floor(aboutStartTime);
+        var minutes = Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100);
+        var newStartTime = new Date(this.year, this.month - 1, this.day, hours, minutes, 0);
+        var startTimeStamp = Math.floor(newStartTime.getTime() / 1000);
+        return startTimeStamp;
+        // const startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100
+        // return startAirTime
     };
     /**
      * 番組のidを取得する
@@ -130,42 +136,54 @@ var TvSchedule = /** @class */ (function () {
         return stationName;
     };
     /**
+     * 同じidのProgramがあるか確認する
+     */
+    TvSchedule.prototype.checkProgramId = function (id) {
+        var hasProgram = null;
+        this.scheduleCollect.programs.forEach(function (program) {
+            if (program.id === id)
+                hasProgram = program;
+        });
+        return hasProgram;
+    };
+    /**
      * 番組表の作成
      */
     TvSchedule.prototype.initTvSchedule = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, htmlData, scheduleData, stationNumber, allStationProgram, minHeight, allStation, tmpArray, _i, allStationProgram_1, allProgram;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var url, htmlData, scheduleData, stationNumber, allStationProgram, minHeight, allStation, _i, allStationProgram_1, allProgram, _a, _b, program, id, title, detail, airTime, startAirTime, checkProgram, newProgram;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         url = "https://tver.jp/app/epg/23/" + this.year + "-" + this.month + "-" + this.day + "/otd/true";
                         return [4 /*yield*/, axios_1.default.get(url)];
                     case 1:
-                        htmlData = _a.sent();
+                        htmlData = _c.sent();
                         scheduleData = HTMLparse.parse(htmlData.data.split('<Tナイト>').join('').split('<Mナイト>').join('').split('<Wナイト>').join(''));
                         stationNumber = 0;
                         allStationProgram = scheduleData.querySelectorAll('.stationRate');
                         minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime'));
                         allStation = this.createStation(scheduleData.querySelectorAll('.station'));
-                        tmpArray = [];
                         for (_i = 0, allStationProgram_1 = allStationProgram; _i < allStationProgram_1.length; _i++) {
                             allProgram = allStationProgram_1[_i];
-                            allProgram.querySelectorAll('.pgbox').forEach(function (program) {
-                                var id = _this.createProgramId(program);
-                                var title = _this.createProgramTitle(program);
-                                var detail = _this.createProgramDetail(program);
-                                var airTime = _this.calculateAirTime(program, minHeight);
-                                var startAirTime = _this.calculateStartAirTime(program, minHeight);
-                                _this.programs.push(new program_model_1.Program(_this, id, title, detail, airTime, startAirTime, allStation[stationNumber]));
-                                // console.log('------------------------------------------------------------')
-                                // console.log(`station: ${allStation[stationNumber]}`)
-                                // console.log(`id: ${id}`)
-                                // console.log(`title: ${title}`)  // 番組名
-                                // console.log(`detail: ${detail}`) // 番組内容
-                                // console.log(`airTime: ${airTime}`) // 放送時間
-                                // console.log(`startAirTime: ${ startAirTime }`) // 放送開始時間
-                            });
+                            for (_a = 0, _b = allProgram.querySelectorAll('.pgbox'); _a < _b.length; _a++) {
+                                program = _b[_a];
+                                id = this.createProgramId(program);
+                                title = this.createProgramTitle(program);
+                                detail = this.createProgramDetail(program);
+                                airTime = this.calculateAirTime(program, minHeight);
+                                startAirTime = this.calculateStartAirTime(program, minHeight);
+                                checkProgram = this.checkProgramId(id);
+                                if (checkProgram === null) {
+                                    newProgram = new program_model_1.Program(this, id, title, detail, airTime, startAirTime, allStation[stationNumber]);
+                                    this.programs.push(newProgram);
+                                    this.scheduleCollect.programs.push(newProgram);
+                                }
+                                else {
+                                    checkProgram.airTime = airTime;
+                                    this.programs.push(checkProgram);
+                                }
+                            }
                             stationNumber++;
                         }
                         return [2 /*return*/];
