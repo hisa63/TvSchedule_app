@@ -123,6 +123,16 @@ var TvScheduleCollect = /** @class */ (function () {
         });
         return this.createMustReservePrograms(shouldReservePrograms); // 最終的に予約する番組を返す
     };
+    //  test
+    TvScheduleCollect.prototype.getProgram = function (id) {
+        var hitProgram = null;
+        this.programs.forEach(function (program) {
+            if (program.id === id) {
+                hitProgram = program;
+            }
+        });
+        return hitProgram;
+    };
     return TvScheduleCollect;
 }());
 exports.TvScheduleCollect = TvScheduleCollect;

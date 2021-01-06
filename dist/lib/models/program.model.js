@@ -11,6 +11,16 @@ var Program = /** @class */ (function () {
         this.tvSchedule = tvSchedule;
         this.station = station;
     }
+    Program.prototype.toObject = function () {
+        return {
+            id: this.id,
+            station: this.station,
+            title: this.title,
+            detail: this.detail,
+            airTime: this.airTime,
+            startAirTime: this.startAirTime
+        };
+    };
     return Program;
 }());
 exports.Program = Program;

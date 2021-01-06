@@ -21,4 +21,15 @@ export class Program {
     this.tvSchedule = tvSchedule
     this.station = station
   }
+
+  public toObject() {
+    return {
+      id: this.id,
+      station: this.station,
+      title: this.title,
+      detail: this.detail,
+      airTime: this.airTime,
+      startAirTime: this.startAirTime
+    }
+  }
 }

@@ -69,4 +69,15 @@ export class TvScheduleCollect {
     })
     return this.createMustReservePrograms(shouldReservePrograms)　// 最終的に予約する番組を返す
   }
+
+  //  test
+  public getProgram(id: number): Program | null {
+    let hitProgram: Program | null = null
+    this.programs.forEach(program => {
+      if (program.id === id) {
+        hitProgram = program
+      }
+    })
+    return hitProgram
+  }
 }

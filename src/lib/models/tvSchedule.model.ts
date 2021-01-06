@@ -129,9 +129,10 @@ export class TvSchedule {
    * keywordにmatchする番組の取得
    */
   public searchPrograms(keyword: string): Program[] {
+    console.log(`keyword: ${keyword}`)
     let hitPrograms: Program[] = []
     this.programs.forEach(program => {
-      if ((program.title.match(keyword)) || (program.title.match(keyword)))
+      if ((program.title.match(keyword)) || (program.detail.match(keyword)))
         hitPrograms.push(program)
     })
     return hitPrograms
