@@ -30,21 +30,23 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   app.get('/programs', (req, res) => {
     try {
       const keyword = req.query.keyword as string | undefined
-      const day = req.query.day
+      const date = req.query.date as string | undefined
 
       let reservePrograms: Program[] = []
-      if (day === undefined) {
+      if (date === undefined) {
         if (keyword !== undefined) reservePrograms = tvScheduleCollect.searchPrograms(String(keyword))
         else reservePrograms = tvScheduleCollect.programs
       } else {
+        const day = date.split("/")
         for (let schedule of tvScheduleCollect.schedules) {
-          if (schedule.day === Number(day)) {
+          if (schedule.day === Number(day[2])) {
             if (keyword !== undefined) reservePrograms = schedule.searchPrograms(String(keyword))
             else reservePrograms = schedule.programs
             break
           }
         }
       }
+      res.status(200)
       res.send(reservePrograms.map(program => program.toObject()))
     } catch (error) {
       res.status(400)

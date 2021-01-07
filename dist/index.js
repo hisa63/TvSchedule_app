@@ -20,36 +20,51 @@ tvScheduleCollect.createWeekSchedule().then(function () {
      * keywordに該当する番組の取得、querystringで日付指定がある場合は指定された日付から該当する番組を取得
      */
     app.get('/programs', function (req, res) {
-        var keyword = req.query.keyword;
-        var day = req.query.day;
-        var reservePrograms = [];
-        if (day === undefined) {
-            if (keyword !== undefined)
-                reservePrograms = tvScheduleCollect.searchPrograms(String(keyword));
-            else
-                reservePrograms = tvScheduleCollect.programs;
-        }
-        else {
-            for (var _i = 0, _a = tvScheduleCollect.schedules; _i < _a.length; _i++) {
-                var schedule = _a[_i];
-                if (schedule.day === Number(day)) {
-                    if (keyword !== undefined)
-                        reservePrograms = schedule.searchPrograms(String(keyword));
-                    else
-                        reservePrograms = schedule.programs;
-                    break;
+        try {
+            var keyword = req.query.keyword;
+            var date = req.query.date;
+            var reservePrograms = [];
+            if (date === undefined) {
+                if (keyword !== undefined)
+                    reservePrograms = tvScheduleCollect.searchPrograms(String(keyword));
+                else
+                    reservePrograms = tvScheduleCollect.programs;
+            }
+            else {
+                var day = date.split("/");
+                for (var _i = 0, _a = tvScheduleCollect.schedules; _i < _a.length; _i++) {
+                    var schedule = _a[_i];
+                    if (schedule.day === Number(day[2])) {
+                        if (keyword !== undefined)
+                            reservePrograms = schedule.searchPrograms(String(keyword));
+                        else
+                            reservePrograms = schedule.programs;
+                        break;
+                    }
                 }
             }
+            res.status(200);
+            res.send(reservePrograms.map(function (program) { return program.toObject(); }));
         }
-        res.send(reservePrograms.map(function (program) { return program.toObject(); }));
+        catch (error) {
+            res.status(400);
+            // res.send(error: error.message)
+        }
     });
     /**
      * 指定idの番組を取得
      */
     app.get('/programs/:id', function (req, res) {
         var _a;
-        var id = Number(req.params.id);
-        res.send((_a = tvScheduleCollect.getProgram(id)) === null || _a === void 0 ? void 0 : _a.toObject());
+        try {
+            var id_1 = Number(req.params.id);
+            var program = tvScheduleCollect.programs.find(function (p) { return p.id === id_1; });
+            if (!id_1)
+                throw new Error("");
+            res.send((_a = tvScheduleCollect.getProgram(id_1)) === null || _a === void 0 ? void 0 : _a.toObject());
+        }
+        catch (error) {
+        }
     });
     /**
      * 予約する番組を取得
@@ -119,7 +134,6 @@ tvScheduleCollect.createWeekSchedule().then(function () {
     var port = process.env.PORT || 3000;
     app.listen(port, function () { return console.log("Listening on port " + port + "..."); });
 });
-//   ^^^^^    test    ^^^^^
 // if (keyword === undefined) {
 //   const allPrograms = tvScheduleCollect.programs.map(program => program.toObject())
 //   res.send(allPrograms)
