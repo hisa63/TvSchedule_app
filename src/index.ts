@@ -146,8 +146,6 @@ tvScheduleCollect.createWeekSchedule().then( () => {
 
 
 
-//   ^^^^^    test    ^^^^^
-
   // if (keyword === undefined) {
   //   const allPrograms = tvScheduleCollect.programs.map(program => program.toObject())
   //   res.send(allPrograms)
