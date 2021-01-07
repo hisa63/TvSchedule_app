@@ -195,7 +195,6 @@ var TvSchedule = /** @class */ (function () {
      * keywordにmatchする番組の取得
      */
     TvSchedule.prototype.searchPrograms = function (keyword) {
-        console.log("keyword: " + keyword);
         var hitPrograms = [];
         this.programs.forEach(function (program) {
             if ((program.title.match(keyword)) || (program.detail.match(keyword)))

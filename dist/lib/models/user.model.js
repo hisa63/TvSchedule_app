@@ -4,9 +4,12 @@ exports.User = void 0;
 var keyword_model_1 = require("./keyword.model");
 var reservation_model_1 = require("./reservation.model");
 var User = /** @class */ (function () {
-    function User() {
-        this.id = 1;
-        this.name = 'hisa';
+    function User(params) {
+        // this.id = "1"
+        this.id = (params === null || params === void 0 ? void 0 : params.id)
+            ? params.id
+            : new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
+        this.name = params.name;
         this.keywords = [];
         this.reservePrograms = [];
     }
@@ -34,8 +37,10 @@ var User = /** @class */ (function () {
      * 入力されたwordをkeywordに登録する
      */
     User.prototype.createKeyword = function (inputWord) {
-        if (this.hasKeyword(inputWord) === false)
-            this.keywords.push(new keyword_model_1.Keyword(this, inputWord));
+        if (this.hasKeyword(inputWord) === false) {
+            var id = new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
+            this.keywords.push(new keyword_model_1.Keyword(id, this, inputWord));
+        }
     };
     /**
      * 入力されたwordをkeywordから削除する
@@ -46,20 +51,42 @@ var User = /** @class */ (function () {
         if (index >= 0)
             this.keywords.splice(index, 1);
     };
-    /**
-     * 予約一覧に指定された番組がなければ予約をする
-     */
-    User.prototype.createReserveProgram = function (program) {
-        var reserveProgramsId = this.createReserveProgramsId();
-        if (reserveProgramsId.indexOf(program.id) < 0)
-            this.reservePrograms.push(new reservation_model_1.Reservation(program, this));
-    };
+    // /**
+    //  * 予約一覧に指定された番組がなければ予約をする
+    //  */
+    // public createReserveProgram(program: Program): Reservation {
+    //   const reserveProgramsId = this.createReserveProgramsId()
+    //   if (reserveProgramsId.indexOf(program.id) < 0) {
+    //     const reservation = new Reservation(program, this)
+    //     this.reservePrograms.push(reservation)
+    //     return reservation
+    //   }
+    //   throw new Error('指定された番組はすでに予約されています')
+    // }
     /**
      * 指定された番組の予約を削除する
      */
     User.prototype.deleteReserveProgram = function (program) {
         var reserveProgramsId = this.createReserveProgramsId();
         var index = reserveProgramsId.indexOf(program.id);
+        if (index >= 0)
+            this.reservePrograms.splice(index, 1);
+    };
+    /**
+     * テスト
+     */
+    User.prototype.isAlreadyReserved = function (id) {
+        var reserveProgramsId = this.createReserveProgramsId();
+        return reserveProgramsId.indexOf(id) >= 0;
+    };
+    User.prototype.createReserveProgram = function (program) {
+        var reservation = new reservation_model_1.Reservation(program, this);
+        this.reservePrograms.push(reservation); //reservePrograms -> reservations
+        return reservation;
+    };
+    User.prototype.testDeleteProgram = function (id) {
+        var reserveProgramsId = this.createReserveProgramsId();
+        var index = reserveProgramsId.indexOf(id);
         if (index >= 0)
             this.reservePrograms.splice(index, 1);
     };
