@@ -4,7 +4,7 @@ import { TvScheduleCollect } from './lib/models/tvScheduleCollect.model'
 import { Program } from './lib/models/program.model'
 import { User } from './lib/models/user.model'
 
-export type Reservation = {
+type Reservation = {
   id: string,
   program_id: number,
   user_id: string
@@ -28,29 +28,42 @@ tvScheduleCollect.createWeekSchedule().then( () => {
    * keywordに該当する番組の取得、querystringで日付指定がある場合は指定された日付から該当する番組を取得
    */
   app.get('/programs', (req, res) => {
-    const keyword = req.query.keyword
-    const day = req.query.day
-    let reservePrograms: Program[] = []
-    if (day === undefined) {
-      if (keyword !== undefined) reservePrograms = tvScheduleCollect.searchPrograms(String(keyword))
-      else reservePrograms = tvScheduleCollect.programs
-    } else {
-      for (let schedule of tvScheduleCollect.schedules) {
-        if (schedule.day === Number(day)) {
-          if (keyword !== undefined) reservePrograms = schedule.searchPrograms(String(keyword))
-          else reservePrograms = schedule.programs
-          break
+    try {
+      const keyword = req.query.keyword as string | undefined
+      const day = req.query.day
+
+      let reservePrograms: Program[] = []
+      if (day === undefined) {
+        if (keyword !== undefined) reservePrograms = tvScheduleCollect.searchPrograms(String(keyword))
+        else reservePrograms = tvScheduleCollect.programs
+      } else {
+        for (let schedule of tvScheduleCollect.schedules) {
+          if (schedule.day === Number(day)) {
+            if (keyword !== undefined) reservePrograms = schedule.searchPrograms(String(keyword))
+            else reservePrograms = schedule.programs
+            break
+          }
         }
       }
+      res.send(reservePrograms.map(program => program.toObject()))
+    } catch (error) {
+      res.status(400)
+      // res.send(error: error.message)
     }
-    res.send(reservePrograms.map(program => program.toObject()))
   })
   /**
    * 指定idの番組を取得
    */
   app.get('/programs/:id', (req, res) => {
-    const id = Number(req.params.id)
-    res.send(tvScheduleCollect.getProgram(id)?.toObject())
+    try {
+      const id = Number(req.params.id)
+      const program = tvScheduleCollect.programs.find(p => p.id === id)
+
+      if (!id) throw new Error(``)
+      res.send(tvScheduleCollect.getProgram(id)?.toObject())
+    } catch (error) {
+
+    }
   })
   /**
    * 予約する番組を取得
