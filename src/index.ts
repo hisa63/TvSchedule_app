@@ -156,8 +156,6 @@ tvScheduleCollect.createWeekSchedule().then( () => {
 
 
 
-
-
   // /**
   //  * querystringのkeyがdayならその日の番組を、keywordならmatchした番組を取得
   //  */

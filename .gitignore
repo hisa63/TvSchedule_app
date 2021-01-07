@@ -1,3 +1,4 @@
 _dist
 _node_modules
 .DS_Store
+vendor
