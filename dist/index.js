@@ -16,6 +16,16 @@ var users = [new user_model_1.User({
         name: 'hisa'
     })];
 tvScheduleCollect.createWeekSchedule().then(function () {
+    function searchPrograms(programs, keyword) {
+        var reservePrograms = [];
+        programs.forEach(function (program) {
+            if ((program.title.match(keyword)) || (program.detail.match(keyword)))
+                reservePrograms.push(program);
+        });
+        if (!reservePrograms.length)
+            throw new Error("keyword: \"" + keyword + "\" \u306B\u8A72\u5F53\u3059\u308B\u756A\u7D44\u306F\u3042\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
+        return reservePrograms;
+    }
     /**
      * keywordに該当する番組の取得、querystringで日付指定がある場合は指定された日付から該当する番組を取得
      */
@@ -24,31 +34,22 @@ tvScheduleCollect.createWeekSchedule().then(function () {
             var keyword = req.query.keyword;
             var date = req.query.date;
             var reservePrograms = [];
-            if (date === undefined) {
-                if (keyword !== undefined)
-                    reservePrograms = tvScheduleCollect.searchPrograms(String(keyword));
-                else
-                    reservePrograms = tvScheduleCollect.programs;
+            if (date !== undefined) {
+                if (date.split('/').length !== 3)
+                    throw new Error('日付を正しく入力してください　ex)YYYY/MM/DD');
+                reservePrograms = tvScheduleCollect.getSchedulePrograms(date);
             }
             else {
-                var day = date.split("/");
-                for (var _i = 0, _a = tvScheduleCollect.schedules; _i < _a.length; _i++) {
-                    var schedule = _a[_i];
-                    if (schedule.day === Number(day[2])) {
-                        if (keyword !== undefined)
-                            reservePrograms = schedule.searchPrograms(String(keyword));
-                        else
-                            reservePrograms = schedule.programs;
-                        break;
-                    }
-                }
+                reservePrograms = tvScheduleCollect.programs;
             }
+            if (keyword !== undefined)
+                reservePrograms = searchPrograms(reservePrograms, keyword);
             res.status(200);
             res.send(reservePrograms.map(function (program) { return program.toObject(); }));
         }
         catch (error) {
             res.status(400);
-            // res.send(error: error.message)
+            res.send({ error: error.message });
         }
     });
     /**
@@ -134,53 +135,4 @@ tvScheduleCollect.createWeekSchedule().then(function () {
     var port = process.env.PORT || 3000;
     app.listen(port, function () { return console.log("Listening on port " + port + "..."); });
 });
-// if (keyword === undefined) {
-//   const allPrograms = tvScheduleCollect.programs.map(program => program.toObject())
-//   res.send(allPrograms)
-// } else {
-//   const hitPrograms = tvScheduleCollect.searchPrograms(String(keyword))
-//   const reservePrograms = hitPrograms.map(program => program.toObject())
-//   res.send(reservePrograms)
-// }
-// /**
-//  * querystringのkeyがdayならその日の番組を、keywordならmatchした番組を取得
-//  */
-// app.get('/programs', (req, res) => {
-//   const keyword = req.query.keyword
-//   const day = req.query.day
-//   if (day) {
-//     for (let schedule of tvScheduleCollect.schedules) {
-//       if (schedule.day === Number(day)) {
-//         const programs = schedule.programs.map(program => program.toObject())
-//         res.send(programs)
-//         break
-//       } 
-//     }
-//   } else if (keyword) {
-//     const hitPrograms = tvScheduleCollect.searchPrograms(String(keyword))
-//     const reservePrograms = hitPrograms.map(program => program.toObject())
-//     res.send(reservePrograms)
-//   }
-// })
-// /**
-//  * 指定された日付の番組を取得
-//  */
-// app.get('/programs', (req, res) => {
-//   const keyword = req.query.keyword 
-//   const day = req.query.day
-//   if (keyword) {
-//     // きーわーどが含まれているプログラムにしぼる
-//   } 
-//   if (day) {
-//     // 日付でさらにしぼる
-//   }
-//   console.log('check')
-//   for (let schedule of tvScheduleCollect.schedules) {
-//     if (schedule.day === Number(day)) {
-//       const programs = schedule.programs.map(program => program.toObject())
-//       res.send(programs)
-//       break
-//     }
-//   }
-// })
 //# sourceMappingURL=index.js.map

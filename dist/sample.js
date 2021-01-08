@@ -285,4 +285,53 @@ main();
 //   })
 //   if (keyword === 'fin') flag = false
 // }
+// if (keyword === undefined) {
+//   const allPrograms = tvScheduleCollect.programs.map(program => program.toObject())
+//   res.send(allPrograms)
+// } else {
+//   const hitPrograms = tvScheduleCollect.searchPrograms(String(keyword))
+//   const reservePrograms = hitPrograms.map(program => program.toObject())
+//   res.send(reservePrograms)
+// }
+// /**
+//  * querystringのkeyがdayならその日の番組を、keywordならmatchした番組を取得
+//  */
+// app.get('/programs', (req, res) => {
+//   const keyword = req.query.keyword
+//   const day = req.query.day
+//   if (day) {
+//     for (let schedule of tvScheduleCollect.schedules) {
+//       if (schedule.day === Number(day)) {
+//         const programs = schedule.programs.map(program => program.toObject())
+//         res.send(programs)
+//         break
+//       } 
+//     }
+//   } else if (keyword) {
+//     const hitPrograms = tvScheduleCollect.searchPrograms(String(keyword))
+//     const reservePrograms = hitPrograms.map(program => program.toObject())
+//     res.send(reservePrograms)
+//   }
+// })
+// /**
+//  * 指定された日付の番組を取得
+//  */
+// app.get('/programs', (req, res) => {
+//   const keyword = req.query.keyword 
+//   const day = req.query.day
+//   if (keyword) {
+//     // きーわーどが含まれているプログラムにしぼる
+//   } 
+//   if (day) {
+//     // 日付でさらにしぼる
+//   }
+//   console.log('check')
+//   for (let schedule of tvScheduleCollect.schedules) {
+//     if (schedule.day === Number(day)) {
+//       const programs = schedule.programs.map(program => program.toObject())
+//       res.send(programs)
+//       break
+//     }
+//   }
+// })
 //# sourceMappingURL=sample.js.map

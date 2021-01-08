@@ -70,7 +70,9 @@ export class TvScheduleCollect {
     return this.createMustReservePrograms(shouldReservePrograms)　// 最終的に予約する番組を返す
   }
 
-  //  test
+  /**
+   * idに一致する番組がある場合はprogram、ない場合はnullを返す
+   */
   public getProgram(id: number): Program | null {
     let hitProgram: Program | null = null
     this.programs.forEach(program => {
@@ -79,5 +81,18 @@ export class TvScheduleCollect {
       }
     })
     return hitProgram
+  }
+  /**
+   * 指定された日付の番組表があるかチェックする
+   */
+  public getSchedulePrograms(paramsDate: string): Program[] {
+    const date = paramsDate.split('/')
+    const year = Number(date[0])
+    const month = Number(date[1])
+    const day = Number(date[2])
+    for (let schedule of this.schedules) {
+      if (schedule.year === year && schedule.month === month && schedule.day === day) return schedule.programs
+    }
+    throw new Error (`${year}年${month}月${day}日の番組表は存在しません`)
   }
 }

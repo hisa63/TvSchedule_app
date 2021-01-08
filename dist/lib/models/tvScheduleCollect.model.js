@@ -123,7 +123,9 @@ var TvScheduleCollect = /** @class */ (function () {
         });
         return this.createMustReservePrograms(shouldReservePrograms); // 最終的に予約する番組を返す
     };
-    //  test
+    /**
+     * idに一致する番組がある場合はprogram、ない場合はnullを返す
+     */
     TvScheduleCollect.prototype.getProgram = function (id) {
         var hitProgram = null;
         this.programs.forEach(function (program) {
@@ -132,6 +134,21 @@ var TvScheduleCollect = /** @class */ (function () {
             }
         });
         return hitProgram;
+    };
+    /**
+     * 指定された日付の番組表があるかチェックする
+     */
+    TvScheduleCollect.prototype.getSchedulePrograms = function (paramsDate) {
+        var date = paramsDate.split('/');
+        var year = Number(date[0]);
+        var month = Number(date[1]);
+        var day = Number(date[2]);
+        for (var _i = 0, _a = this.schedules; _i < _a.length; _i++) {
+            var schedule = _a[_i];
+            if (schedule.year === year && schedule.month === month && schedule.day === day)
+                return schedule.programs;
+        }
+        throw new Error(year + "\u5E74" + month + "\u6708" + day + "\u65E5\u306E\u756A\u7D44\u8868\u306F\u5B58\u5728\u3057\u307E\u305B\u3093");
     };
     return TvScheduleCollect;
 }());

@@ -21,9 +21,16 @@ const users = [new User({
 })]
 
 
-
-
 tvScheduleCollect.createWeekSchedule().then( () => {
+  function searchPrograms(programs: Program[], keyword: string): Program[] {
+    let reservePrograms: Program[] = []
+    programs.forEach(program => {
+      if ((program.title.match(keyword)) || (program.detail.match(keyword))) reservePrograms.push(program)
+    })
+    if (!reservePrograms.length) throw new Error(`keyword: "${keyword}" に該当する番組はありませんでした`)
+    return reservePrograms
+  }
+  
   /**
    * keywordに該当する番組の取得、querystringで日付指定がある場合は指定された日付から該当する番組を取得
    */
@@ -31,26 +38,20 @@ tvScheduleCollect.createWeekSchedule().then( () => {
     try {
       const keyword = req.query.keyword as string | undefined
       const date = req.query.date as string | undefined
-
       let reservePrograms: Program[] = []
-      if (date === undefined) {
-        if (keyword !== undefined) reservePrograms = tvScheduleCollect.searchPrograms(String(keyword))
-        else reservePrograms = tvScheduleCollect.programs
+
+      if (date !== undefined) {
+        if (date.split('/').length !== 3) throw new Error('日付を正しく入力してください　ex)YYYY/MM/DD')
+        reservePrograms = tvScheduleCollect.getSchedulePrograms(date)
       } else {
-        const day = date.split("/")
-        for (let schedule of tvScheduleCollect.schedules) {
-          if (schedule.day === Number(day[2])) {
-            if (keyword !== undefined) reservePrograms = schedule.searchPrograms(String(keyword))
-            else reservePrograms = schedule.programs
-            break
-          }
-        }
+        reservePrograms = tvScheduleCollect.programs
       }
+      if (keyword !== undefined) reservePrograms = searchPrograms(reservePrograms, keyword)
       res.status(200)
       res.send(reservePrograms.map(program => program.toObject()))
     } catch (error) {
       res.status(400)
-      // res.send(error: error.message)
+      res.send({error: error.message})
     }
   })
   /**
@@ -92,9 +93,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
 
       const program = tvScheduleCollect.programs.find(p => p.id === reservation.program_id)
       if (!program) throw new Error(`program_id ${reservation.program_id}は存在しません`)
-      
-      
-
+  
       const newReservation = user.createReserveProgram(program)
       res.status(200)
       res.send(newReservation.toObject())      
@@ -102,11 +101,6 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       res.status(400)
       res.send({error: error.message})
     }
-
-
-
-
-
   })
   // app.post('/users/:userId/programs/:programId/reserves', (req, res) => {
   //   const program = req.params.program
@@ -145,65 +139,3 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   const port = process.env.PORT || 3000
   app.listen(port, () => console.log(`Listening on port ${port}...`))
 })
-
-
-  // if (keyword === undefined) {
-  //   const allPrograms = tvScheduleCollect.programs.map(program => program.toObject())
-  //   res.send(allPrograms)
-  // } else {
-  //   const hitPrograms = tvScheduleCollect.searchPrograms(String(keyword))
-  //   const reservePrograms = hitPrograms.map(program => program.toObject())
-  //   res.send(reservePrograms)
-  // }
-
-
-
-  // /**
-  //  * querystringのkeyがdayならその日の番組を、keywordならmatchした番組を取得
-  //  */
-  // app.get('/programs', (req, res) => {
-  //   const keyword = req.query.keyword
-  //   const day = req.query.day
-
-  //   if (day) {
-  //     for (let schedule of tvScheduleCollect.schedules) {
-  //       if (schedule.day === Number(day)) {
-  //         const programs = schedule.programs.map(program => program.toObject())
-  //         res.send(programs)
-  //         break
-  //       } 
-  //     }
-  //   } else if (keyword) {
-  //     const hitPrograms = tvScheduleCollect.searchPrograms(String(keyword))
-  //     const reservePrograms = hitPrograms.map(program => program.toObject())
-  //     res.send(reservePrograms)
-  //   }
-  // })
-
-  // /**
-  //  * 指定された日付の番組を取得
-  //  */
-  // app.get('/programs', (req, res) => {
-  //   const keyword = req.query.keyword 
-  //   const day = req.query.day
-
-  //   if (keyword) {
-  //     // きーわーどが含まれているプログラムにしぼる
-  //   } 
-
-  //   if (day) {
-  //     // 日付でさらにしぼる
-  //   }
-
-
-
-  //   console.log('check')
-
-  //   for (let schedule of tvScheduleCollect.schedules) {
-  //     if (schedule.day === Number(day)) {
-  //       const programs = schedule.programs.map(program => program.toObject())
-  //       res.send(programs)
-  //       break
-  //     }
-  //   }
-  // })

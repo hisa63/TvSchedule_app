@@ -18,8 +18,8 @@ export class User {
   constructor(params: UserParams) {
     // this.id = "1"
     this.id = (params?.id) 
-              ? params.id 
-              : new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16)
+            ? params.id 
+            : new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16)
     
     this.name = params.name
     this.keywords = []
@@ -96,6 +96,12 @@ export class User {
     this.reservePrograms.push(reservation) //reservePrograms -> reservations
     return reservation
   }
+
+
+
+
+
+  
   public testDeleteProgram(id: number): void {
     const reserveProgramsId = this.createReserveProgramsId()
     const index = reserveProgramsId.indexOf(id)

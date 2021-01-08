@@ -136,4 +136,10 @@ export class TvSchedule {
     })
     return hitPrograms
   }
+  /**
+   * keywordにhitした番組を返す
+   */
+  // public searchHitPrograms(programs: Program[], keyword: string): Program[] {
+
+  // }
 }
