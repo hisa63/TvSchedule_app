@@ -1,6 +1,8 @@
 import express from 'express'
 import bodyParser from 'body-parser'
+import moment from 'moment'
 import { TvScheduleCollect } from './lib/models/tvScheduleCollect.model'
+import { TvSchedule } from './lib/models/tvSchedule.model'
 import { Program } from './lib/models/program.model'
 import { User } from './lib/models/user.model'
 
@@ -21,19 +23,7 @@ const users = [new User({
 })]
 
 
-tvScheduleCollect.createWeekSchedule().then( () => {
-  /**
-   * programs内にkeywordに該当する番組があるかを検索する
-   */
-  function searchPrograms(programs: Program[], keyword: string): Program[] {
-    let reservePrograms: Program[] = []
-    programs.forEach(program => {
-      if ((program.title.match(keyword)) || (program.detail.match(keyword))) reservePrograms.push(program)
-    })
-    if (!reservePrograms.length) throw new Error(`keyword: "${keyword}" に該当する番組はありませんでした`)
-    return reservePrograms
-  }
-  
+tvScheduleCollect.createWeekSchedule().then( () => { 
   /**
    * keywordに該当する番組の取得、querystringで日付指定がある場合は指定された日付から該当する番組を取得
    */
@@ -42,14 +32,21 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const keyword = req.query.keyword as string | undefined
       const date = req.query.date as string | undefined
       let reservePrograms: Program[] = []
+      let schedule: TvSchedule | null | undefined = undefined
 
-      if (date !== undefined) {
-        if (date.split('/').length !== 3) throw new Error('日付を正しく入力してください　ex)YYYY/MM/DD')
-        reservePrograms = tvScheduleCollect.getSchedulePrograms(date)
+      if (date) {
+        const dateParsed = moment(date, 'YYYY-MM-DD', true)
+        console.log(`dateParsed`)
+        if (!dateParsed.isValid()) throw new Error('日付を正しく入力してください　ex)YYYY-MM-DD')
+        schedule = tvScheduleCollect.getSpecifiedSchedule(dateParsed)
+        if (schedule === null) throw new Error('指定された日付の番組表は存在しません')
+
+        if (keyword) reservePrograms = schedule.searchPrograms(keyword)
+        else reservePrograms = schedule.programs
       } else {
-        reservePrograms = tvScheduleCollect.programs
+        if (keyword) reservePrograms = tvScheduleCollect.searchPrograms(keyword)
+        else reservePrograms = tvScheduleCollect.programs
       }
-      if (keyword !== undefined) reservePrograms = searchPrograms(reservePrograms, keyword)
       res.status(200)
       res.send(reservePrograms.map(program => program.toObject()))
     } catch (error) {

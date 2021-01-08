@@ -69,7 +69,6 @@ export class TvScheduleCollect {
     })
     return this.createMustReservePrograms(shouldReservePrograms)　// 最終的に予約する番組を返す
   }
-
   /**
    * idに一致する番組がある場合はprogram、ない場合はnullを返す
    */
@@ -85,14 +84,14 @@ export class TvScheduleCollect {
   /**
    * 指定された日付の番組表があるかチェックする
    */
-  public getSchedulePrograms(paramsDate: string): Program[] {
-    const date = paramsDate.split('/')
-    const year = Number(date[0])
-    const month = Number(date[1])
-    const day = Number(date[2])
+  public getSpecifiedSchedule(date: moment.Moment): TvSchedule | null {
+    const year = date.year()
+    const month = date.month() + 1
+    const day = date.date()
+
     for (let schedule of this.schedules) {
-      if (schedule.year === year && schedule.month === month && schedule.day === day) return schedule.programs
+      if (schedule.year === year && schedule.month === month && schedule.day === day) return schedule
     }
-    throw new Error (`${year}年${month}月${day}日の番組表は存在しません`)
+    return null
   }
 }
