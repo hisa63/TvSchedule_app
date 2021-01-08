@@ -22,6 +22,9 @@ const users = [new User({
 
 
 tvScheduleCollect.createWeekSchedule().then( () => {
+  /**
+   * programs内にkeywordに該当する番組があるかを検索する
+   */
   function searchPrograms(programs: Program[], keyword: string): Program[] {
     let reservePrograms: Program[] = []
     programs.forEach(program => {
