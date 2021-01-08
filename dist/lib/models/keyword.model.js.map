@@ -1,1 +1,0 @@
-{"version":3,"file":"keyword.model.js","sourceRoot":"","sources":["../../../src/lib/models/keyword.model.ts"],"names":[],"mappings":";;;AAGA;IAIE,mBAAmB;IAEnB,iBAAa,EAAU,EAAE,IAAU,EAAE,OAAe;QAClD,IAAI,CAAC,EAAE,GAAG,EAAE,CAAA;QACZ,IAAI,CAAC,IAAI,GAAG,IAAI,CAAA;QAChB,IAAI,CAAC,OAAO,GAAG,OAAO,CAAA;QACtB,2BAA2B;IAC7B,CAAC;IACH,cAAC;AAAD,CAAC,AAZD,IAYC;AAZY,0BAAO"}
