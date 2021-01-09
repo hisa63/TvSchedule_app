@@ -60,21 +60,37 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   app.get('/programs/:id', (req, res) => {
     try {
       const id = Number(req.params.id)
+      if (isNaN(id)) throw new Error('id番号を入力してください')
+      
       const program = tvScheduleCollect.programs.find(p => p.id === id)
-
-      if (!id) throw new Error(``)
-      res.send(tvScheduleCollect.getProgram(id)?.toObject())
+      res.status(200)
+      if (program !== undefined) res.send(program?.toObject())
+      else res.send('該当する番組はありませんでした')
     } catch (error) {
-
+      res.status(400)
+      res.send({ error: error.message })
     }
   })
   /**
    * 予約する番組を取得
    */
-  // app.get('/reservations', (req, res) => {
-  //   const reservePrograms = user.reservePrograms.map(program => program.program.toObject())
-  //   res.send(reservePrograms)
-  // })
+  app.get('/reservations', (req, res) => {
+    try {
+    const userId = req.query.user_id as string | undefined
+    const reservationId = req.query.reservation_id as string | undefined
+    if (userId === undefined) throw new Error(`ログインをしてください`)
+    if (isNaN(Number(userId))) throw new Error(`指定されたuser_id: ${userId}は無効です`)
+    const user = users.find(u => u.id === userId)
+    if (user === undefined) throw new Error(`指定されたuserは存在しません`)
+
+
+    const reservePrograms = user.reservePrograms.map(program => program.program.toObject())
+    res.send(reservePrograms)
+    } catch (error) {
+      res.status(400)
+      res.send({ error: error.message })
+    }
+  }) 
   /**
    * 番組を予約する
    */
