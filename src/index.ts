@@ -76,16 +76,15 @@ tvScheduleCollect.createWeekSchedule().then( () => {
    */
   app.get('/reservations', (req, res) => {
     try {
-    const userId = req.query.user_id as string | undefined
-    const reservationId = req.query.reservation_id as string | undefined
-    if (userId === undefined) throw new Error(`ログインをしてください`)
-    if (isNaN(Number(userId))) throw new Error(`指定されたuser_id: ${userId}は無効です`)
-    const user = users.find(u => u.id === userId)
-    if (user === undefined) throw new Error(`指定されたuserは存在しません`)
+      const userId = req.query.user_id as string | undefined
+      if (userId === undefined) throw new Error(`ログインをしてください`)
+      if (isNaN(Number(userId))) throw new Error(`指定されたuser_id: ${userId}は無効です`)
+      const user = users.find(u => u.id === userId)
+      if (user === undefined) throw new Error(`指定されたuserは存在しません`)
 
-
-    const reservePrograms = user.reservePrograms.map(program => program.program.toObject())
-    res.send(reservePrograms)
+      const reservePrograms = user.reservePrograms
+      res.status(200)
+      res.send(reservePrograms.map(program => program.program.toObject()))
     } catch (error) {
       res.status(400)
       res.send({ error: error.message })
@@ -94,8 +93,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   /**
    * 番組を予約する
    */
-  app.post('/reservations', (req, res) => { //testです
-
+  app.post('/reservations', (req, res) => {
     try {
       const reservation = req.body as Reservation
       
@@ -118,19 +116,28 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       res.send({error: error.message})
     }
   })
-  // app.post('/users/:userId/programs/:programId/reserves', (req, res) => {
-  //   const program = req.params.program
-  //   user.createReserveProgram(Number(program))
-  // })
-
   /**
    * 予約番組を削除する
    */
-  // app.delete('/reservations/:reservationId', (req, res) => {
-  //   const programId = req.params.programId
-  //   user.testDeleteProgram(Number(programId))
-  //   res.send(programId)
-  // })
+  app.delete('/reservations/:reservation_id', (req, res) => {
+    try {
+      const userId = req.query.user_id as string | undefined
+      const reservationId = req.params.reservation_id
+
+      if (userId === undefined) throw new Error('ログインしてください')
+      const user = users.find(u => u.id === userId)
+      if (user === undefined) throw new Error(`user_id:${userId}は存在しません`)
+      if (isNaN(Number(reservationId))) throw new Error('無効なidです')
+
+      const deleteReservation = user.deleteReserveProgram(Number(reservationId))
+      res.status(200)
+      if (deleteReservation === undefined) res.send('指定された予約はありませんでした')
+      else res.send({ reservation_id: deleteReservation.id })
+    } catch (error) {
+      res.status(400)
+      res.send({ error: error.message })
+    }
+  })
 
   /**
    * 新規でkeywordを登録する

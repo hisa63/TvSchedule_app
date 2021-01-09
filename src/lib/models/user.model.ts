@@ -75,15 +75,19 @@ export class User {
   /**
    * 指定された番組の予約を削除する
    */
-  public deleteReserveProgram(program: Program): void {
+  public deleteReserveProgram(reservationId: number): Reservation | undefined {
     const reserveProgramsId = this.createReserveProgramsId()
-    const index = reserveProgramsId.indexOf(program.id)
-    if (index >= 0) this.reservePrograms.splice(index, 1)
+    const index = reserveProgramsId.indexOf(reservationId)
+
+    let deleteReservation: Reservation | undefined
+    if (index >= 0) {
+      deleteReservation = this.reservePrograms[index] 
+      this.reservePrograms.splice(index, 1)
+    } else {
+      deleteReservation = undefined
+    }
+    return deleteReservation
   }
-
-
-
-
   /**
    * テスト
    */
