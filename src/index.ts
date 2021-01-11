@@ -12,6 +12,12 @@ type Reservation = {
   user_id: string
 }
 
+type Keyword = {
+  id: string,
+  user_id: string,
+  keyword: string
+}
+
 const app: express.Express = express()
 app.use(express.json())
 app.use(bodyParser.json())
@@ -77,7 +83,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   app.get('/reservations', (req, res) => {
     try {
       const userId = req.query.user_id as string | undefined
-      if (userId === undefined) throw new Error(`ログインをしてください`)
+      if (userId === undefined) throw new Error(`user_idを指定してください`)
       if (isNaN(Number(userId))) throw new Error(`指定されたuser_id: ${userId}は無効です`)
       const user = users.find(u => u.id === userId)
       if (user === undefined) throw new Error(`指定されたuserは存在しません`)
@@ -124,7 +130,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const userId = req.query.user_id as string | undefined
       const reservationId = req.params.reservation_id
 
-      if (userId === undefined) throw new Error('ログインしてください')
+      if (userId === undefined) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === userId)
       if (user === undefined) throw new Error(`user_id:${userId}は存在しません`)
       if (isNaN(Number(reservationId))) throw new Error('無効なidです')
@@ -142,14 +148,14 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   /**
    * 新規でkeywordを登録する
    */
-  // app.post('/keywords', (req, res) => {
-  //   const id = req.params.id
-  //   const keyword = req.params.keyword
+  app.post('/keywords', (req, res) => {
+    const keyParams = req.body as Keyword
+    if (!keyParams.user_id) throw new Error('user_idを指定してください')
 
-  //   // userの配列からreq.params.idと一致するuserを取得
-  //   //const user = getUser()
-  //   user.createKeyword(keyword)
-  // })
+    // userの配列からreq.params.idと一致するuserを取得
+    //const user = getUser()
+    // user.createKeyword(keyword)
+  })
   /**
    * 該当するkeywordを削除
    */
