@@ -68,18 +68,6 @@ export class User {
     }
     return deleteKeyword
   }
-  // /**
-  //  * 予約一覧に指定された番組がなければ予約をする
-  //  */
-  // public createReserveProgram(program: Program): Reservation {
-  //   const reserveProgramsId = this.createReserveProgramsId()
-  //   if (reserveProgramsId.indexOf(program.id) < 0) {
-  //     const reservation = new Reservation(program, this)
-  //     this.reservePrograms.push(reservation)
-  //     return reservation
-  //   }
-  //   throw new Error('指定された番組はすでに予約されています')
-  // }
   /**
    * 指定された番組の予約を削除する
    */
@@ -97,26 +85,18 @@ export class User {
     return deleteReservation
   }
   /**
-   * テスト
+   * 指定された番組が既に予約されているか確認する
    */
   public isAlreadyReserved(id: number): boolean {
     const reserveProgramsId = this.createReserveProgramsId()
     return reserveProgramsId.indexOf(id) >= 0
   }
+  /**
+   * 指定された番組を予約する
+   */
   public createReserveProgram(program: Program): Reservation {
     const reservation = new Reservation(program, this)
     this.reservePrograms.push(reservation) //reservePrograms -> reservations
     return reservation
-  }
-
-
-
-
-
-  
-  public testDeleteProgram(id: number): void {
-    const reserveProgramsId = this.createReserveProgramsId()
-    const index = reserveProgramsId.indexOf(id)
-    if (index >= 0) this.reservePrograms.splice(index, 1)
   }
 }
