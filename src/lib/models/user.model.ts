@@ -46,11 +46,14 @@ export class User {
   /**
    * 入力されたwordをkeywordに登録する 
    */
-  public createKeyword(inputWord: string): void {
-    if (this.hasKeyword(inputWord) === false) {
+  public createKeyword(inputWord: string): Keyword | null {
+    let keyword: Keyword | null =  null
+    if (!this.hasKeyword(inputWord)) {
       const id = new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16)
-      this.keywords.push(new Keyword(id, this, inputWord))
+      keyword = new Keyword(id, this, inputWord)
+      this.keywords.push(keyword)
     }
+    return keyword
   }
   /**
    * 入力されたwordをkeywordから削除する

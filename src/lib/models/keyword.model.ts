@@ -13,4 +13,12 @@ export class Keyword {
     this.keyword = keyword
     // this.priority = priority
   }
+
+  public toObject() {
+    return {
+      id: this.id,
+      user: this.user.id,
+      keyword: this.keyword
+    }
+  } 
 }

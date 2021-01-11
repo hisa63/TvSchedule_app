@@ -5,6 +5,7 @@ import { TvScheduleCollect } from './lib/models/tvScheduleCollect.model'
 import { TvSchedule } from './lib/models/tvSchedule.model'
 import { Program } from './lib/models/program.model'
 import { User } from './lib/models/user.model'
+import { send } from 'process'
 
 type Reservation = {
   id: string,
@@ -144,17 +145,43 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       res.send({ error: error.message })
     }
   })
+  /**
+   * keywordを取得する
+   */
+  app.get('/keywords', (req, res) => {
+    try {
+      const userId = req.query.user_id as string | undefined
+      if (userId === undefined) throw new Error('user_idを入力してください')
+      const user = users.find(u => u.id === userId)
+      if (user === undefined) throw new Error('指定されたuserは存在しません')
 
+      const keywords = user.keywords
+      res.status(200)
+      res.send(keywords.map(keyword => keyword.toObject()))
+    } catch (error) {
+      res.status(400)
+      res.send({ error: error.message })
+    }
+  })
   /**
    * 新規でkeywordを登録する
    */
   app.post('/keywords', (req, res) => {
-    const keyParams = req.body as Keyword
-    if (!keyParams.user_id) throw new Error('user_idを指定してください')
+    try {
+      const keyParams = req.body as Keyword
+      if (!keyParams.user_id) throw new Error('user_idを指定してください')
+      const user = users.find(u => u.id === keyParams.user_id)
+      if (user === undefined) throw new Error('指定されたuserは存在しません')
+      if (!keyParams.keyword) throw new Error('keywordを入力してください')
 
-    // userの配列からreq.params.idと一致するuserを取得
-    //const user = getUser()
-    // user.createKeyword(keyword)
+      const keyword = user.createKeyword(keyParams.keyword)
+      res.status(200)
+      if (keyword === null) res.send('指定されたkeywordは既に登録されています')
+      else res.send(keyword.id)
+    } catch (error) {
+      res.status(400)
+      res.send({ error: error.message })
+    }
   })
   /**
    * 該当するkeywordを削除
