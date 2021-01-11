@@ -6,6 +6,7 @@ import { TvSchedule } from './lib/models/tvSchedule.model'
 import { Program } from './lib/models/program.model'
 import { User } from './lib/models/user.model'
 import { send } from 'process'
+import { read } from 'fs'
 
 type Reservation = {
   id: string,
@@ -30,7 +31,7 @@ const users = [new User({
 })]
 
 
-tvScheduleCollect.createWeekSchedule().then( () => { 
+tvScheduleCollect.createWeekSchedule().then( () => {
   /**
    * keywordに該当する番組の取得、querystringで日付指定がある場合は指定された日付から該当する番組を取得
    */
@@ -71,7 +72,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       
       const program = tvScheduleCollect.programs.find(p => p.id === id)
       res.status(200)
-      if (program !== undefined) res.send(program?.toObject())
+      if (program !== undefined) res.send(program.toObject())
       else res.send('該当する番組はありませんでした')
     } catch (error) {
       res.status(400)
@@ -173,6 +174,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const user = users.find(u => u.id === keyParams.user_id)
       if (user === undefined) throw new Error('指定されたuserは存在しません')
       if (!keyParams.keyword) throw new Error('keywordを入力してください')
+      if (!keyParams.keyword.match('/\S/g')) throw new Error('keywordに空白などの空白文字を使用しないでください')
 
       const keyword = user.createKeyword(keyParams.keyword)
       res.status(200)
@@ -186,11 +188,24 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   /**
    * 該当するkeywordを削除
    */
-  // app.delete('/keywords/:keywordId', (req, res) => {
-  //   const keyword = req.params.keyword
-  //   user.deleteKeyword(keyword)
-  //   res.send(keyword)
-  // })
+  app.delete('/keywords/:keywordId', (req, res) => {
+    try {
+      const userId = req.query.user_id as string | undefined
+      if (userId === undefined) throw new Error('user_idを指定してください')
+      const user = users.find(u => u.id === userId)
+      if (user === undefined) throw new Error('指定されたuserは存在しません')
+
+      const keywordId = req.params.keywordId
+      console.log(keywordId)
+      const deleteKeyword = user.deleteKeyword(keywordId)
+      res.status(200)
+      if (deleteKeyword === null) res.send('指定されたkeywordは存在しません')
+      else res.send({ keyword_id: deleteKeyword.id })
+    } catch (error) {
+      res.status(400)
+      res.send({ error: error.message })
+    }
+  })
 
   const port = process.env.PORT || 3000
   app.listen(port, () => console.log(`Listening on port ${port}...`))

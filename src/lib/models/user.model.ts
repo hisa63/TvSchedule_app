@@ -58,10 +58,15 @@ export class User {
   /**
    * 入力されたwordをkeywordから削除する
    */
-  public deleteKeyword(inputWord: string): void {
-    const words = this.keywords.map(key => { return key.keyword })
-    const index = words.indexOf(inputWord)
-    if (index >= 0) this.keywords.splice(index, 1)
+  public deleteKeyword(keywordId: string): Keyword | null {
+    let deleteKeyword: Keyword | null = null
+    const keywordsId = this.keywords.map(key => key.id)
+    const index = keywordsId.indexOf(keywordId)
+    if (index >= 0) {
+      deleteKeyword = this.keywords[index]
+      this.keywords.splice(index, 1)
+    }
+    return deleteKeyword
   }
   // /**
   //  * 予約一覧に指定された番組がなければ予約をする
