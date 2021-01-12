@@ -65,9 +65,9 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   /**
    * 指定idの番組を取得
    */
-  app.get('/programs/:id', (req, res) => {
+  app.get('/programs/:programs_id', (req, res) => {
     try {
-      const id = Number(req.params.id)
+      const id = Number(req.params.programs_id)
       if (isNaN(id)) throw new Error('id番号を入力してください')
       
       const program = tvScheduleCollect.programs.find(p => p.id === id)
