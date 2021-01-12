@@ -71,9 +71,13 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (isNaN(id)) throw new Error('id番号を入力してください')
       
       const program = tvScheduleCollect.programs.find(p => p.id === id)
-      res.status(200)
-      if (program !== undefined) res.send(program.toObject())
-      else res.send('該当する番組はありませんでした')
+      if (program !== undefined) {
+        res.status(200)
+        res.send(program.toObject())
+      } else {
+        res.status(400)
+        res.send('該当する番組はありませんでした')
+      }
     } catch (error) {
       res.status(400)
       res.send({ error: error.message })
@@ -138,9 +142,13 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (isNaN(Number(reservationId))) throw new Error('無効なidです')
 
       const deleteReservation = user.deleteReserveProgram(Number(reservationId))
-      res.status(200)
-      if (deleteReservation === undefined) res.send('指定された予約はありませんでした')
-      else res.send({ reservation_id: deleteReservation.id })
+      if (deleteReservation !== undefined) {
+        res.status(200)
+        res.send({ reservation_id: deleteReservation.id })
+      } else {
+        res.status(404)
+        res.send('指定された予約はありませんでした')
+      }
     } catch (error) {
       res.status(400)
       res.send({ error: error.message })
@@ -198,9 +206,13 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const keywordId = req.params.keywordId
       console.log(keywordId)
       const deleteKeyword = user.deleteKeyword(keywordId)
-      res.status(200)
-      if (deleteKeyword === null) res.send('指定されたkeywordは存在しません')
-      else res.send({ keyword_id: deleteKeyword.id })
+      if (deleteKeyword !== null) {
+        res.status(200)
+        res.send({ keyword_id: deleteKeyword.id })
+      } else {
+        res.send(404)
+        res.send('指定されたkeywordは存在しません')
+      }
     } catch (error) {
       res.status(400)
       res.send({ error: error.message })
