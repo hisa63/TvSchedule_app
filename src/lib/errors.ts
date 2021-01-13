@@ -1,4 +1,4 @@
-// export class NotFoundError extends Error {}　  <-- これだと機能しない
+// export class NotFoundError extends Error {}
 
 class BaseError extends Error {  
   constructor(e: string) {

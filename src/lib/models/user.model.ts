@@ -2,7 +2,7 @@ import { Keyword } from './keyword.model'
 import { TvScheduleCollect } from './tvScheduleCollect.model'
 import { Reservation } from './reservation.model'
 import { Program } from './program.model'
-import { NotFoundError } from './error.model'
+import { NotFoundError } from '../errors'
 
 type UserParams = {
   id?: string 
