@@ -72,16 +72,18 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (isNaN(id)) throw new Error('id番号を入力してください')
       
       const program = tvScheduleCollect.programs.find(p => p.id === id)
-      if (program !== undefined) {
-        res.status(200)
-        res.send(program.toObject())
+      if (!program) throw new NotFoundError('該当する番組が見つかりませんでした')
+      
+      res.status(200)
+      res.send(program.toObject())
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
       } else {
         res.status(400)
-        res.send('該当する番組はありませんでした')
+        res.send({ error: e.message })
       }
-    } catch (error) {
-      res.status(400)
-      res.send({ error: error.message })
     }
   })
   /**
@@ -143,8 +145,8 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (isNaN(Number(reservationId))) throw new Error('無効なidです')
 
       const deleteReservation = user.deleteReserveProgram(Number(reservationId))
-        res.status(200)
-        res.send({ reservation_id: deleteReservation.id })
+      res.status(200)
+      res.send({ reservation_id: deleteReservation.id })
     } catch (e) {
       if (e instanceof NotFoundError) { // a instanceof b --> aはbから派生しているかどうか？
         res.status(404)
