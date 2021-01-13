@@ -45,10 +45,9 @@ tvScheduleCollect.createWeekSchedule().then( () => {
 
       if (date) {
         const dateParsed = moment(date, 'YYYY-MM-DD', true)
-        console.log(`dateParsed`)
         if (!dateParsed.isValid()) throw new Error('日付を正しく入力してください　ex)YYYY-MM-DD')
         schedule = tvScheduleCollect.getSpecifiedSchedule(dateParsed)
-        if (schedule === null) throw new Error('指定された日付の番組表は存在しません')
+        if (schedule === null) throw new NotFoundError('指定された日付の番組表は存在しません')
 
         if (keyword) reservePrograms = schedule.searchPrograms(keyword)
         else reservePrograms = schedule.programs
@@ -58,9 +57,14 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       }
       res.status(200)
       res.send(reservePrograms.map(program => program.toObject()))
-    } catch (error) {
-      res.status(400)
-      res.send({error: error.message})
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
+      } else {
+        res.status(400)
+        res.send({error: e.message})
+      }
     }
   })
   /**
