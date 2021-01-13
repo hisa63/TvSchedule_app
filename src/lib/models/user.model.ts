@@ -59,15 +59,16 @@ export class User {
   /**
    * 入力されたwordをkeywordから削除する
    */
-  public deleteKeyword(keywordId: string): Keyword | null {
-    let deleteKeyword: Keyword | null = null
+  public deleteKeyword(keywordId: string): Keyword {
+    let deleteKeyword: Keyword
     const keywordsId = this.keywords.map(key => key.id)
     const index = keywordsId.indexOf(keywordId)
     if (index >= 0) {
       deleteKeyword = this.keywords[index]
       this.keywords.splice(index, 1)
+      return deleteKeyword
     }
-    return deleteKeyword
+    throw new NotFoundError('指定されたkeywordは登録されていません')
   }
   /**
    * 指定された番組の予約を削除する

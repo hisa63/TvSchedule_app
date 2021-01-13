@@ -45,10 +45,9 @@ tvScheduleCollect.createWeekSchedule().then( () => {
 
       if (date) {
         const dateParsed = moment(date, 'YYYY-MM-DD', true)
-        console.log(`dateParsed`)
         if (!dateParsed.isValid()) throw new Error('日付を正しく入力してください　ex)YYYY-MM-DD')
         schedule = tvScheduleCollect.getSpecifiedSchedule(dateParsed)
-        if (schedule === null) throw new Error('指定された日付の番組表は存在しません')
+        if (schedule === null) throw new NotFoundError('指定された日付の番組表は存在しません')
 
         if (keyword) reservePrograms = schedule.searchPrograms(keyword)
         else reservePrograms = schedule.programs
@@ -58,9 +57,14 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       }
       res.status(200)
       res.send(reservePrograms.map(program => program.toObject()))
-    } catch (error) {
-      res.status(400)
-      res.send({error: error.message})
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
+      } else {
+        res.status(400)
+        res.send({error: e.message})
+      }
     }
   })
   /**
@@ -72,16 +76,18 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (isNaN(id)) throw new Error('id番号を入力してください')
       
       const program = tvScheduleCollect.programs.find(p => p.id === id)
-      if (program !== undefined) {
-        res.status(200)
-        res.send(program.toObject())
+      if (!program) throw new NotFoundError('該当する番組が見つかりませんでした')
+      
+      res.status(200)
+      res.send(program.toObject())
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
       } else {
         res.status(400)
-        res.send('該当する番組はありませんでした')
+        res.send({ error: e.message })
       }
-    } catch (error) {
-      res.status(400)
-      res.send({ error: error.message })
     }
   })
   /**
@@ -93,14 +99,19 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (userId === undefined) throw new Error(`user_idを指定してください`)
       if (isNaN(Number(userId))) throw new Error(`指定されたuser_id: ${userId}は無効です`)
       const user = users.find(u => u.id === userId)
-      if (user === undefined) throw new Error(`指定されたuserは存在しません`)
+      if (user === undefined) throw new NotFoundError(`指定されたuserは存在しません`)
 
       const reservePrograms = user.reservePrograms
       res.status(200)
       res.send(reservePrograms.map(program => program.program.toObject()))
-    } catch (error) {
-      res.status(400)
-      res.send({ error: error.message })
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
+      } else {
+        res.status(400)
+        res.send({ error: e.message })
+      }
     }
   }) 
   /**
@@ -110,23 +121,27 @@ tvScheduleCollect.createWeekSchedule().then( () => {
     try {
       const reservation = req.body as Reservation
       
-      // error checkをしてください       
       if (!reservation.program_id) throw new Error('program_idを指定してください')
       if (!reservation.user_id) throw new Error('user_idを指定してください')
       
       const user = users.find(u => u.id === reservation.user_id)
-      if (!user) throw new Error(`user_id ${reservation.user_id}は存在しません`)
-      if (user.isAlreadyReserved(reservation.program_id)) throw new Error(`${reservation.program_id} はすでに予約されています`)
+      if (!user) throw new NotFoundError(`user_id ${reservation.user_id}は存在しません`)
+      if (user.isAlreadyReserved(reservation.program_id)) throw new Error('指定された番組はすでに予約されています')
 
       const program = tvScheduleCollect.programs.find(p => p.id === reservation.program_id)
-      if (!program) throw new Error(`program_id ${reservation.program_id}は存在しません`)
+      if (!program) throw new NotFoundError('指定された番組は存在しません')
   
       const newReservation = user.createReserveProgram(program)
       res.status(200)
       res.send(newReservation.toObject())      
-    } catch (error) {
-      res.status(400)
-      res.send({error: error.message})
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
+      } else {
+        res.status(400)
+        res.send({error: e.message})
+      }
     }
   })
   /**
@@ -137,14 +152,14 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const userId = req.query.user_id as string | undefined
       const reservationId = req.params.reservation_id
 
-      if (userId === undefined) throw new Error('user_idを指定してください')
+      if (!userId) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === userId)
-      if (user === undefined) throw new Error(`user_id:${userId}は存在しません`)
+      if (!user) throw new NotFoundError(`user_id:${userId}は存在しません`)
       if (isNaN(Number(reservationId))) throw new Error('無効なidです')
 
       const deleteReservation = user.deleteReserveProgram(Number(reservationId))
-        res.status(200)
-        res.send({ reservation_id: deleteReservation.id })
+      res.status(200)
+      res.send({ reservation_id: deleteReservation.id })
     } catch (e) {
       if (e instanceof NotFoundError) { // a instanceof b --> aはbから派生しているかどうか？
         res.status(404)
@@ -163,14 +178,20 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const userId = req.query.user_id as string | undefined
       if (userId === undefined) throw new Error('user_idを入力してください')
       const user = users.find(u => u.id === userId)
-      if (user === undefined) throw new Error('指定されたuserは存在しません')
+      if (user === undefined) throw new NotFoundError('指定されたuserは存在しません')
 
       const keywords = user.keywords
+      if (!keywords.length) throw new NotFoundError('keywordは登録されていません') 
       res.status(200)
       res.send(keywords.map(keyword => keyword.toObject()))
-    } catch (error) {
-      res.status(400)
-      res.send({ error: error.message })
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
+      } else {
+        res.status(400)
+        res.send({ error: e.message })
+      } 
     }
   })
   /**
@@ -181,7 +202,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const keyParams = req.body as Keyword
       if (!keyParams.user_id) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === keyParams.user_id)
-      if (user === undefined) throw new Error('指定されたuserは存在しません')
+      if (user === undefined) throw new NotFoundError('指定されたuserは存在しません')
       if (!keyParams.keyword) throw new Error('keywordを入力してください')
       if (!keyParams.keyword.match('/\S/g')) throw new Error('keywordに空白などの空白文字を使用しないでください')
 
@@ -189,9 +210,14 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       res.status(200)
       if (keyword === null) res.send('指定されたkeywordは既に登録されています')
       else res.send(keyword.id)
-    } catch (error) {
-      res.status(400)
-      res.send({ error: error.message })
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
+      } else {
+        res.status(400)
+        res.send({ error: e.message })
+      }
     }
   })
   /**
@@ -200,23 +226,22 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   app.delete('/keywords/:keywordId', (req, res) => {
     try {
       const userId = req.query.user_id as string | undefined
-      if (userId === undefined) throw new Error('user_idを指定してください')
+      if (!userId) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === userId)
-      if (user === undefined) throw new Error('指定されたuserは存在しません')
+      if (!user) throw new NotFoundError('指定されたuserは存在しません')
 
       const keywordId = req.params.keywordId
-      console.log(keywordId)
       const deleteKeyword = user.deleteKeyword(keywordId)
-      if (deleteKeyword !== null) {
-        res.status(200)
-        res.send({ keyword_id: deleteKeyword.id })
+      res.status(200)
+      res.send({ keyword_id: deleteKeyword.id })
+    } catch (e) {
+      if (e instanceof NotFoundError) {
+        res.status(404)
+        res.send({ error: e.message })
       } else {
-        res.send(404)
-        res.send('指定されたkeywordは存在しません')
-      }
-    } catch (error) {
-      res.status(400)
-      res.send({ error: error.message })
+        res.status(400)
+        res.send({ error: e.message })
+      }        
     }
   })
 
