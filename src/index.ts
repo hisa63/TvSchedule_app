@@ -7,6 +7,7 @@ import { Program } from './lib/models/program.model'
 import { User } from './lib/models/user.model'
 import { send } from 'process'
 import { read } from 'fs'
+import { NotFoundError } from './lib/models/error.model'
 
 type Reservation = {
   id: string,
@@ -146,12 +147,17 @@ tvScheduleCollect.createWeekSchedule().then( () => {
         res.status(200)
         res.send({ reservation_id: deleteReservation.id })
       } else {
-        res.status(404)
-        res.send('指定された予約はありませんでした')
+        // res.status(404)
+        // res.send('指定された予約はありませんでした')
       }
-    } catch (error) {
-      res.status(400)
-      res.send({ error: error.message })
+    } catch (e) {
+      if (e instanceof NotFoundError) { // a instanceof b --> aはbから派生しているかどうか？
+        res.status(404)
+        res.send({ error: e.message })
+      } else {
+        res.status(400)
+        res.send({ error: e.message })
+      }
     }
   })
   /**

@@ -2,6 +2,7 @@ import { Keyword } from './keyword.model'
 import { TvScheduleCollect } from './tvScheduleCollect.model'
 import { Reservation } from './reservation.model'
 import { Program } from './program.model'
+import { NotFoundError } from './error.model'
 
 type UserParams = {
   id?: string 
@@ -71,18 +72,18 @@ export class User {
   /**
    * 指定された番組の予約を削除する
    */
-  public deleteReserveProgram(reservationId: number): Reservation | undefined {
+  public deleteReserveProgram(reservationId: number): Reservation {
     const reserveProgramsId = this.createReserveProgramsId()
     const index = reserveProgramsId.indexOf(reservationId)
 
-    let deleteReservation: Reservation | undefined
+    let deleteReservation: Reservation
     if (index >= 0) {
       deleteReservation = this.reservePrograms[index] 
       this.reservePrograms.splice(index, 1)
+      return deleteReservation
     } else {
-      deleteReservation = undefined
+      throw new NotFoundError('予約リストに指定された番組は存在しません')
     }
-    return deleteReservation
   }
   /**
    * 指定された番組が既に予約されているか確認する
