@@ -108,7 +108,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
 
       const reservePrograms = user.reservePrograms
       res.status(200)
-      res.send(reservePrograms.map(program => program.program.toObject()))
+      res.send(reservePrograms.map(reservation => reservation.toObject()))
     } catch (e) {
       if (e instanceof NotFoundError) {
         res.status(404)
@@ -160,9 +160,8 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (!userId) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === userId)
       if (!user) throw new NotFoundError(`user_id:${userId}は存在しません`)
-      if (isNaN(Number(reservationId))) throw new Error('無効なidです')
 
-      const deleteReservation = user.deleteReserveProgram(Number(reservationId))
+      const deleteReservation = user.deleteReserveProgram(reservationId)
       res.status(200)
       res.send({ reservation_id: deleteReservation.id })
     } catch (e) {

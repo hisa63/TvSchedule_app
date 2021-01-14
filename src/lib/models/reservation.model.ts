@@ -15,6 +15,7 @@ export class Reservation {
     return {
       id: this.id,
       program: this.program.id,
+      program_title: this.program.title,
       user_id: this.user.id
     }
   }
