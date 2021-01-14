@@ -3,8 +3,6 @@ import { Program } from './program.model'
 import { Station } from './station.model'
 import axios from 'axios'
 import * as HTMLparse from 'fast-html-parser' 
-import { start } from 'repl'
-import { NotFoundError } from '../errors'
 
 export class TvSchedule {
   scheduleCollect: TvScheduleCollect
@@ -49,8 +47,6 @@ export class TvSchedule {
     const newStartTime = new Date(this.year, this.month - 1, this.day, hours, minutes, 0)
     const startTimeStamp = Math.floor(newStartTime.getTime() / 1000)
     return startTimeStamp
-    // const startAirTime = Math.floor(aboutStartTime) + Math.round(aboutStartTime % Math.floor(aboutStartTime) * .6 * 100) / 100
-    // return startAirTime
   }
   /**
    * 番組のidを取得する
@@ -85,16 +81,6 @@ export class TvSchedule {
     return stationName
   }
   /**
-   * 同じidのProgramがあるか確認する
-   */
-  private checkProgramId(id: number): Program | null {
-    let hasProgram: Program | null = null
-    this.scheduleCollect.programs.forEach(program => {
-      if (program.id === id) hasProgram = program
-    })
-    return hasProgram
-  }
-  /**
    * 番組表の作成
    */
   public async initTvSchedule() {
@@ -114,8 +100,9 @@ export class TvSchedule {
         const detail = this.createProgramDetail(program)
         const airTime = this.calculateAirTime(program, minHeight)
         const startAirTime = this.calculateStartAirTime(program, minHeight)
-        const checkProgram = this.checkProgramId(id)
-        if (checkProgram === null) {
+        const checkProgram = this.scheduleCollect.programs.find(p => p.id === id)
+
+        if (!checkProgram) {
           const newProgram = new Program(this, id, title, detail, airTime, startAirTime, allStation[stationNumber])
           this.programs.push(newProgram)
           this.scheduleCollect.programs.push(newProgram)
