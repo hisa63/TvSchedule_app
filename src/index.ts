@@ -130,7 +130,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (!program) throw new NotFoundError('指定された番組は存在しません')
   
       const newReservation = user.createReserveProgram(program)
-      res.status(200)
+      res.status(201)
       res.send(newReservation.toObject())      
     } catch (e) {
       if (e instanceof NotFoundError) {
@@ -205,7 +205,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (keyParams.keyword.match(/\s/g)) throw new Error('keywordに空白などの空白文字を使用しないでください')
 
       const keyword = user.createKeyword(keyParams.keyword)
-      res.status(200)
+      res.status(201)
       res.send({ keyword_id: keyword.id })
     } catch (e) {
       if (e instanceof NotFoundError) {
