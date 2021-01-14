@@ -8,7 +8,6 @@ type UserParams = {
   name: string
 }
 
-
 export class User {
   id: string
   name: string
@@ -16,7 +15,6 @@ export class User {
   reservePrograms: Reservation[]
 
   constructor(params: UserParams) {
-    // this.id = "1"
     this.id = (params?.id) 
             ? params.id 
             : new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16)
@@ -51,30 +49,21 @@ export class User {
    * 入力されたwordをkeywordから削除する
    */
   public deleteKeyword(keywordId: string): Keyword {
-    let deleteKeyword: Keyword
-    const keywordsId = this.keywords.map(key => key.id)
-    const index = keywordsId.indexOf(keywordId)
-    if (index >= 0) {
-      deleteKeyword = this.keywords[index]
-      this.keywords.splice(index, 1)
-      return deleteKeyword
-    }
-    throw new NotFoundError('指定されたkeywordは登録されていません')
+    const keyword = this.keywords.find(k => k.id === keywordId)
+    if (!keyword) throw new NotFoundError('指定されたkeywordは登録されていません')
+    
+    this.keywords = this.keywords.filter(k => k.id !== keywordId)
+    return keyword
   }
   /**
    * 指定された番組の予約を削除する
    */
-  public deleteReserveProgram(reservationId: number): Reservation {
-    const reserveProgramsId = this.createReserveProgramsId()
-    const index = reserveProgramsId.indexOf(reservationId)
+  public deleteReserveProgram(reservationId: string): Reservation {
+    const reservation = this.reservePrograms.find(r => r.id === reservationId)
+    if (!reservation) throw new NotFoundError('予約リストに指定された番組は存在しません')
 
-    let deleteReservation: Reservation
-    if (index >= 0) {
-      deleteReservation = this.reservePrograms[index] 
-      this.reservePrograms.splice(index, 1)
-      return deleteReservation
-    }
-    throw new NotFoundError('予約リストに指定された番組は存在しません')
+    this.reservePrograms = this.reservePrograms.filter(r => r.id !== reservationId)
+    return reservation
   }
   /**
    * 指定された番組が既に予約されているか確認する

@@ -29,7 +29,6 @@ const users = [new User({
   name: 'hisa'
 })]
 
-
 tvScheduleCollect.createWeekSchedule().then( () => {
   /**
    * keywordに該当する番組の取得、querystringで日付指定がある場合は指定された日付から該当する番組を取得
@@ -39,16 +38,24 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const keyword = req.query.keyword as string | undefined
       const date = req.query.date as string | undefined
       let reservePrograms: Program[] = []
-      let schedule: TvSchedule | null | undefined = undefined
 
       if (date) {
         const dateParsed = moment(date, 'YYYY-MM-DD', true)
         if (!dateParsed.isValid()) throw new Error('日付を正しく入力してください　ex)YYYY-MM-DD')
-        schedule = tvScheduleCollect.getSpecifiedSchedule(dateParsed)
-        if (schedule === null) throw new NotFoundError('指定された日付の番組表は存在しません')
+        const schedule = tvScheduleCollect.getSpecifiedSchedule(dateParsed)
 
+        //// case 1
+        if (keyword) {
+          reservePrograms = schedule.searchPrograms(keyword)
+          if (!reservePrograms.length) throw new NotFoundError(`指定されたkeyword:[${keyword}]に該当する番組はありませんでした`)
+        } else {
+          reservePrograms = schedule.programs
+        }
+        //// case 2
         if (keyword) reservePrograms = schedule.searchPrograms(keyword)
         else reservePrograms = schedule.programs
+        if (!reservePrograms.length) throw new NotFoundError(`指定されたkeyword:[${keyword}]に該当する番組はありませんでした`)
+        ////
       } else {
         if (keyword) reservePrograms = tvScheduleCollect.searchPrograms(keyword)
         else reservePrograms = tvScheduleCollect.programs
@@ -94,14 +101,14 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   app.get('/reservations', (req, res) => {
     try {
       const userId = req.query.user_id as string | undefined
-      if (userId === undefined) throw new Error(`user_idを指定してください`)
+      if (!userId) throw new Error(`user_idを指定してください`)
       if (isNaN(Number(userId))) throw new Error(`指定されたuser_id: ${userId}は無効です`)
       const user = users.find(u => u.id === userId)
-      if (user === undefined) throw new NotFoundError(`指定されたuserは存在しません`)
+      if (!user) throw new NotFoundError(`指定されたuserは存在しません`)
 
       const reservePrograms = user.reservePrograms
       res.status(200)
-      res.send(reservePrograms.map(program => program.program.toObject()))
+      res.send(reservePrograms.map(reservation => reservation.toObject()))
     } catch (e) {
       if (e instanceof NotFoundError) {
         res.status(404)
@@ -153,9 +160,8 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (!userId) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === userId)
       if (!user) throw new NotFoundError(`user_id:${userId}は存在しません`)
-      if (isNaN(Number(reservationId))) throw new Error('無効なidです')
 
-      const deleteReservation = user.deleteReserveProgram(Number(reservationId))
+      const deleteReservation = user.deleteReserveProgram(reservationId)
       res.status(200)
       res.send({ reservation_id: deleteReservation.id })
     } catch (e) {
@@ -174,9 +180,9 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   app.get('/keywords', (req, res) => {
     try {
       const userId = req.query.user_id as string | undefined
-      if (userId === undefined) throw new Error('user_idを入力してください')
+      if (!userId) throw new Error('user_idを入力してください')
       const user = users.find(u => u.id === userId)
-      if (user === undefined) throw new NotFoundError('指定されたuserは存在しません')
+      if (!user) throw new NotFoundError('指定されたuserは存在しません')
 
       const keywords = user.keywords
       if (!keywords.length) throw new NotFoundError('keywordは登録されていません') 
@@ -200,7 +206,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const keyParams = req.body as Keyword
       if (!keyParams.user_id) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === keyParams.user_id)
-      if (user === undefined) throw new NotFoundError('指定されたuserは存在しません')
+      if (!user) throw new NotFoundError('指定されたuserは存在しません')
       if (!keyParams.keyword) throw new Error('keywordを入力してください')
       if (keyParams.keyword.match(/\s/g)) throw new Error('keywordに空白などの空白文字を使用しないでください')
 

@@ -1,5 +1,4 @@
 import { Program } from './program.model'
-import { Keyword } from './keyword.model'
 import { User } from './user.model'
 
 export class Reservation {
@@ -16,6 +15,7 @@ export class Reservation {
     return {
       id: this.id,
       program: this.program.id,
+      program_title: this.program.title,
       user_id: this.user.id
     }
   }
