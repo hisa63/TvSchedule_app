@@ -101,10 +101,10 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   app.get('/reservations', (req, res) => {
     try {
       const userId = req.query.user_id as string | undefined
-      if (userId === undefined) throw new Error(`user_idを指定してください`)
+      if (!userId) throw new Error(`user_idを指定してください`)
       if (isNaN(Number(userId))) throw new Error(`指定されたuser_id: ${userId}は無効です`)
       const user = users.find(u => u.id === userId)
-      if (user === undefined) throw new NotFoundError(`指定されたuserは存在しません`)
+      if (!user) throw new NotFoundError(`指定されたuserは存在しません`)
 
       const reservePrograms = user.reservePrograms
       res.status(200)
@@ -181,9 +181,9 @@ tvScheduleCollect.createWeekSchedule().then( () => {
   app.get('/keywords', (req, res) => {
     try {
       const userId = req.query.user_id as string | undefined
-      if (userId === undefined) throw new Error('user_idを入力してください')
+      if (!userId) throw new Error('user_idを入力してください')
       const user = users.find(u => u.id === userId)
-      if (user === undefined) throw new NotFoundError('指定されたuserは存在しません')
+      if (!user) throw new NotFoundError('指定されたuserは存在しません')
 
       const keywords = user.keywords
       if (!keywords.length) throw new NotFoundError('keywordは登録されていません') 
@@ -207,7 +207,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const keyParams = req.body as Keyword
       if (!keyParams.user_id) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === keyParams.user_id)
-      if (user === undefined) throw new NotFoundError('指定されたuserは存在しません')
+      if (!user) throw new NotFoundError('指定されたuserは存在しません')
       if (!keyParams.keyword) throw new Error('keywordを入力してください')
       if (keyParams.keyword.match(/\s/g)) throw new Error('keywordに空白などの空白文字を使用しないでください')
 
