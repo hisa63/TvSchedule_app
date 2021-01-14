@@ -38,8 +38,7 @@ export class User {
   public createKeyword(inputWord: string): Keyword {
     let keyword = this.keywords.find(k => k.keyword === inputWord)
     if (!keyword) {
-      const id = new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16)
-      keyword = new Keyword(id, this, inputWord)
+      keyword = new Keyword(this, inputWord)
       this.keywords.push(keyword)
       return keyword
     }

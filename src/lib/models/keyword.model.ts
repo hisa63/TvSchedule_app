@@ -5,8 +5,8 @@ export class Keyword {
   user: User
   keyword: string
 
-  constructor (id: string ,user: User, keyword: string) {
-    this.id = id
+  constructor (user: User, keyword: string) {
+    this.id = new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16)
     this.user = user
     this.keyword = keyword
   }
