@@ -100,7 +100,8 @@ export class TvSchedule {
   public async initTvSchedule() {
     const url = `https://tver.jp/app/epg/23/${this.year}-${this.month}-${this.day}/otd/true`
     const htmlData = await axios.get(url)
-    const scheduleData = HTMLparse.parse(htmlData.data.split('<Tナイト>').join('').split('<Mナイト>').join('').split('<Wナイト>').join(''))
+    const scheduleData = HTMLparse.parse(htmlData.data.split('<Tナイト>').join('').split('<Mナイト>').join('').split('<Wナイト>').join('')
+    　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　.split('<U-18歌うま甲子園 新人王決定戦>').join(''))
     let stationNumber = 0
     const allStationProgram = scheduleData.querySelectorAll('.stationRate')
     const minHeight = this.createOneMinHeight(scheduleData.querySelector('.epgtime')!)
