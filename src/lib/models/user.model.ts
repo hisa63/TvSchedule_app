@@ -1,5 +1,4 @@
 import { Keyword } from './keyword.model'
-import { TvScheduleCollect } from './tvScheduleCollect.model'
 import { Reservation } from './reservation.model'
 import { Program } from './program.model'
 import { NotFoundError } from '../errors'
@@ -27,15 +26,6 @@ export class User {
     this.reservePrograms = []
   }
   /**
-   * keywordがすでに登録されているか確認する
-   */
-  private hasKeyword(inputWord: string): boolean {
-    for (let key of this.keywords) {
-      if (key.keyword === inputWord) return true
-    }
-    return false
-  }
-  /**
    * 予約されている番組のidを配列にして取得
    */
   private createReserveProgramsId(): number[] {
@@ -47,14 +37,15 @@ export class User {
   /**
    * 入力されたwordをkeywordに登録する 
    */
-  public createKeyword(inputWord: string): Keyword | null {
-    let keyword: Keyword | null =  null
-    if (!this.hasKeyword(inputWord)) {
+  public createKeyword(inputWord: string): Keyword {
+    let keyword = this.keywords.find(k => k.keyword === inputWord)
+    if (!keyword) {
       const id = new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16)
       keyword = new Keyword(id, this, inputWord)
       this.keywords.push(keyword)
+      return keyword
     }
-    return keyword
+    throw new Error(`指定されたkeyword[${inputWord}]はすでに登録されています`)
   }
   /**
    * 入力されたwordをkeywordから削除する
@@ -82,9 +73,8 @@ export class User {
       deleteReservation = this.reservePrograms[index] 
       this.reservePrograms.splice(index, 1)
       return deleteReservation
-    } else {
-      throw new NotFoundError('予約リストに指定された番組は存在しません')
     }
+    throw new NotFoundError('予約リストに指定された番組は存在しません')
   }
   /**
    * 指定された番組が既に予約されているか確認する

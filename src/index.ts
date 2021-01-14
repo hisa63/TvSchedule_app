@@ -5,8 +5,6 @@ import { TvScheduleCollect } from './lib/models/tvScheduleCollect.model'
 import { TvSchedule } from './lib/models/tvSchedule.model'
 import { Program } from './lib/models/program.model'
 import { User } from './lib/models/user.model'
-import { send } from 'process'
-import { read } from 'fs'
 import { NotFoundError } from './lib/errors'
 
 type Reservation = {
@@ -204,12 +202,11 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const user = users.find(u => u.id === keyParams.user_id)
       if (user === undefined) throw new NotFoundError('指定されたuserは存在しません')
       if (!keyParams.keyword) throw new Error('keywordを入力してください')
-      if (!keyParams.keyword.match('/\S/g')) throw new Error('keywordに空白などの空白文字を使用しないでください')
+      if (keyParams.keyword.match(/\s/g)) throw new Error('keywordに空白などの空白文字を使用しないでください')
 
       const keyword = user.createKeyword(keyParams.keyword)
       res.status(200)
-      if (keyword === null) res.send('指定されたkeywordは既に登録されています')
-      else res.send(keyword.id)
+      res.send({ keyword_id: keyword.id })
     } catch (e) {
       if (e instanceof NotFoundError) {
         res.status(404)
