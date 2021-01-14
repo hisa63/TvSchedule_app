@@ -29,7 +29,6 @@ const users = [new User({
   name: 'hisa'
 })]
 
-
 tvScheduleCollect.createWeekSchedule().then( () => {
   /**
    * keywordに該当する番組の取得、querystringで日付指定がある場合は指定された日付から該当する番組を取得
@@ -39,16 +38,24 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       const keyword = req.query.keyword as string | undefined
       const date = req.query.date as string | undefined
       let reservePrograms: Program[] = []
-      let schedule: TvSchedule | null | undefined = undefined
 
       if (date) {
         const dateParsed = moment(date, 'YYYY-MM-DD', true)
         if (!dateParsed.isValid()) throw new Error('日付を正しく入力してください　ex)YYYY-MM-DD')
-        schedule = tvScheduleCollect.getSpecifiedSchedule(dateParsed)
-        if (schedule === null) throw new NotFoundError('指定された日付の番組表は存在しません')
+        const schedule = tvScheduleCollect.getSpecifiedSchedule(dateParsed)
 
+        //// case 1
+        if (keyword) {
+          reservePrograms = schedule.searchPrograms(keyword)
+          if (!reservePrograms.length) throw new NotFoundError(`指定されたkeyword:[${keyword}]に該当する番組はありませんでした`)
+        } else {
+          reservePrograms = schedule.programs
+        }
+        //// case 2
         if (keyword) reservePrograms = schedule.searchPrograms(keyword)
         else reservePrograms = schedule.programs
+        if (!reservePrograms.length) throw new NotFoundError(`指定されたkeyword:[${keyword}]に該当する番組はありませんでした`)
+        ////
       } else {
         if (keyword) reservePrograms = tvScheduleCollect.searchPrograms(keyword)
         else reservePrograms = tvScheduleCollect.programs

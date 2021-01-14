@@ -4,6 +4,7 @@ import { Station } from './station.model'
 import axios from 'axios'
 import * as HTMLparse from 'fast-html-parser' 
 import { start } from 'repl'
+import { NotFoundError } from '../errors'
 
 export class TvSchedule {
   scheduleCollect: TvScheduleCollect
@@ -136,10 +137,4 @@ export class TvSchedule {
     })
     return hitPrograms
   }
-  /**
-   * keywordにhitした番組を返す
-   */
-  // public searchHitPrograms(programs: Program[], keyword: string): Program[] {
-
-  // }
 }
