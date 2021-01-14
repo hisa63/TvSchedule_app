@@ -1,5 +1,4 @@
 import { Program } from './program.model'
-import { Keyword } from './keyword.model'
 import { User } from './user.model'
 
 export class Reservation {

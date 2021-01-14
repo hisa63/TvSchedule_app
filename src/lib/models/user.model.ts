@@ -8,7 +8,6 @@ type UserParams = {
   name: string
 }
 
-
 export class User {
   id: string
   name: string
@@ -16,7 +15,6 @@ export class User {
   reservePrograms: Reservation[]
 
   constructor(params: UserParams) {
-    // this.id = "1"
     this.id = (params?.id) 
             ? params.id 
             : new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16)

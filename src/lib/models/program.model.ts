@@ -1,6 +1,4 @@
 import { TvSchedule } from './tvSchedule.model'
-import { Station } from './station.model'
-import { Reservation } from './reservation.model'
 
 export class Program {
   tvSchedule: TvSchedule 
