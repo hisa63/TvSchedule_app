@@ -73,18 +73,6 @@ export class TvScheduleCollect {
     return shouldReservePrograms
   }
   /**
-   * idに一致する番組がある場合はprogram、ない場合はnullを返す
-   */
-  public getProgram(id: number): Program | null {
-    let hitProgram: Program | null = null
-    this.programs.forEach(program => {
-      if (program.id === id) {
-        hitProgram = program
-      }
-    })
-    return hitProgram
-  }
-  /**
    * 指定された日付の番組表があるかチェックする
    */
   public getSpecifiedSchedule(date: moment.Moment): TvSchedule {
