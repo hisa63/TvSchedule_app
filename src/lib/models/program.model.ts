@@ -1,7 +1,7 @@
 import { TvSchedule } from './tvSchedule.model'
 
 export class Program {
-  tvSchedule: TvSchedule 
+  tvSchedule: TvSchedule
 
   id: number
   title: string

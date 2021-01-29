@@ -17,5 +17,5 @@ export class Keyword {
       user: this.user.id,
       keyword: this.keyword
     }
-  } 
+  }
 }

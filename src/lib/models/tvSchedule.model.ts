@@ -2,7 +2,7 @@ import { TvScheduleCollect } from './tvScheduleCollect.model'
 import { Program } from './program.model'
 import { Station } from './station.model'
 import axios from 'axios'
-import * as HTMLparse from 'fast-html-parser' 
+import * as HTMLparse from 'fast-html-parser'
 
 export class TvSchedule {
   scheduleCollect: TvScheduleCollect
@@ -29,7 +29,7 @@ export class TvSchedule {
     return minHeight
   }
   /**
-   * 放送時間を計算する 
+   * 放送時間を計算する
    */
   private calculateAirTime(program: HTMLparse.HTMLElement, minHeight: number): number {
     const programHeight = program.attributes.style.match(/(?<=height:).*(?=px;left)/)
@@ -94,7 +94,7 @@ export class TvSchedule {
     const allStation = this.createStation(scheduleData.querySelectorAll('.station'))
 
     for (let allProgram of allStationProgram) {
-      for (let program of allProgram.querySelectorAll('.pgbox')) { 
+      for (let program of allProgram.querySelectorAll('.pgbox')) {
         const id = this.createProgramId(program)
         const title = this.createProgramTitle(program)
         const detail = this.createProgramDetail(program)
