@@ -2,10 +2,11 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import moment from 'moment'
 import { TvScheduleCollect } from './lib/models/tvScheduleCollect.model'
-import { TvSchedule } from './lib/models/tvSchedule.model'
 import { Program } from './lib/models/program.model'
 import { User } from './lib/models/user.model'
 import { NotFoundError } from './lib/errors'
+
+// import cors from 'cors'
 
 type Reservation = {
   id: string,
@@ -22,9 +23,21 @@ type Keyword = {
 const app: express.Express = express()
 app.use(express.json())
 app.use(bodyParser.json())
+app.use(function (req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH')
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Origin, X-Csrftoken, Content-Type, Accept')
+  next()
+})
+
+// const corsOptions = {
+//   origin: 'http://localhost:4200',
+//   optionsSuccessStatus: 200
+// }
+// app.use(cors(corsOptions))
 
 const tvScheduleCollect = new TvScheduleCollect()
-const users = [new User({ 
+const users = [new User({
   id: '1',
   name: 'hisa'
 })]
@@ -50,6 +63,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
         if (keyword) reservePrograms = tvScheduleCollect.searchPrograms(keyword)
         else reservePrograms = tvScheduleCollect.programs
       }
+
       res.status(200)
       res.send(reservePrograms.map(program => program.toObject()))
     } catch (e) {
@@ -69,8 +83,8 @@ tvScheduleCollect.createWeekSchedule().then( () => {
     try {
       const id = Number(req.params.programs_id)
       if (isNaN(id)) throw new Error('id番号を入力してください')
-      
-      const program = tvScheduleCollect.programs.find(p => p.id === id)     
+
+      const program = tvScheduleCollect.programs.find(p => p.id === id)
       res.status(200)
       if (!program) res.send([])
       else res.send(program.toObject())
@@ -107,13 +121,13 @@ tvScheduleCollect.createWeekSchedule().then( () => {
         res.send({ error: e.message })
       }
     }
-  }) 
+  })
   /**
    * 番組を予約する
    */
   app.post('/reservations', (req, res) => {
     try {
-      const reservation = req.body as Reservation 
+      const reservation = req.body as Reservation
       if (!reservation.program_id) throw new Error('program_idを指定してください')
       if (!reservation.user_id) throw new Error('user_idを指定してください')
       const user = users.find(u => u.id === reservation.user_id)
@@ -121,10 +135,10 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       if (user.isAlreadyReserved(reservation.program_id)) throw new Error('指定された番組はすでに予約されています')
       const program = tvScheduleCollect.programs.find(p => p.id === reservation.program_id)
       if (!program) throw new NotFoundError('指定された番組は存在しません')
-  
+
       const newReservation = user.createReserveProgram(program)
       res.status(201)
-      res.send(newReservation.toObject())      
+      res.send(newReservation.toObject())
     } catch (e) {
       if (e instanceof NotFoundError) {
         res.status(404)
@@ -181,7 +195,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       } else {
         res.status(400)
         res.send({ error: e.message })
-      } 
+      }
     }
   })
   /**
@@ -230,7 +244,7 @@ tvScheduleCollect.createWeekSchedule().then( () => {
       } else {
         res.status(400)
         res.send({ error: e.message })
-      }        
+      }
     }
   })
 
